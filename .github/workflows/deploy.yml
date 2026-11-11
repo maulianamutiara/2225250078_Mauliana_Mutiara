@@ -1,5 +1,5 @@
 # Setiap push ke main: tes → build → pasang ke GitHub Pages.
-# Hasil: https://maulianamutiara.github.io/relasi-pintar/
+# Hasil: https://maulianamutiara.github.io/2225250078_Mauliana_Mutiara/
 name: Deploy ke GitHub Pages
 
 on:
