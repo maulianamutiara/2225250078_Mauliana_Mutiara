@@ -106,6 +106,21 @@ Syarat buka level berikutnya: ≥ 70% benar pada level sebelumnya.
 - Kunci: (Ani, Futsal), (Ani, Pramuka), (Budi, Pramuka), (Candra, Paduan Suara)
 
 > Target bank soal MVP: **L1: 8, L2: 8, L3: 8, L4: 6** soal + 10 soal pretest/posttest paralel.
+>
+> **Status (11 Nov 2026):** 34 soal sudah dibuat dan dipakai aplikasi — teks lengkap (soal, kunci,
+> hint, pembahasan) ada di `src/content/topic0.ts` … `topic6.ts`. Ubah soal di file tersebut.
+> Tes otomatis (`src/content/content.test.ts`) memeriksa kunci soal bilangan, jumlah hint, dan
+> batas kalimat. Pretest/posttest belum dibuat.
+>
+> | Topik | Soal | Bentuk |
+> |---|---|---|
+> | 0 Himpunan | H0-1 … H0-4 | Pilihan ganda (L1) |
+> | 1 Apa itu Relasi | R1-1 … R1-4 | Pilihan ganda, diagram panah (L1) |
+> | 2 Diagram Panah | P2-1 … P2-6 | Diagram panah, termasuk contoh sebagian (L1–L2) |
+> | 3 Pasangan Berurutan | P3-1 … P3-5 | Pilihan ganda, susun pasangan (L1–L2) |
+> | 4 Kartesius | P4-1 … P4-5 | Pilihan ganda, Kartesius (L1–L3) |
+> | 5 Tiga Wajah | P5-1 … P5-5 | Ubah bentuk penyajian, "faktor dari", "lebih dari" (L3) |
+> | 6 Soal Cerita | P6-1 … P6-5 | Cerita + Pecah Soal (L4) |
 
 ## 8. Katalog Kesalahan Umum (untuk umpan balik spesifik)
 
