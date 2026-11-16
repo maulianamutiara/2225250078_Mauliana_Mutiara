@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { LessonView } from '../components/lesson/LessonView';
 import { ProblemView, type ProblemOutcome } from '../components/practice/ProblemView';
@@ -8,6 +8,7 @@ import { Card } from '../components/ui/Card';
 import { Modal } from '../components/ui/Modal';
 import { Stars } from '../components/ui/Stars';
 import { findTopicContent } from '../content';
+import { functionsFor, type CognitiveFunctionId } from '../content/rmt';
 import { findTopic } from '../content/topics';
 import type { TopicContent } from '../content/types';
 import { starsForProblem, starsForTopic } from '../domain/grading';
@@ -28,7 +29,7 @@ export function TopicScreen() {
       {topic && content ? (
         <>
           <h1 className="mb-3 text-2xl font-bold">{topic.title}</h1>
-          <TopicRunner key={topicId} content={content} />
+          <TopicRunner key={topicId} content={content} title={topic.title} />
         </>
       ) : (
         <Card className="mt-4">
@@ -41,8 +42,36 @@ export function TopicScreen() {
 
 type Phase = 'lesson' | 'practice' | 'result' | 'reflect';
 
+/** Penanda fase RMT (docs/RMT.md): alat & konsep → latihan → refleksi. */
+const PHASES: { id: Phase[]; label: string }[] = [
+  { id: ['lesson'], label: '① Kenali alat & konsep' },
+  { id: ['practice'], label: '② Latihan' },
+  { id: ['result', 'reflect'], label: '③ Refleksi' },
+];
+
+function PhaseBar({ phase }: { phase: Phase }) {
+  return (
+    <ol className="mb-4 flex gap-1 text-xs font-bold" aria-label="Tahap belajar">
+      {PHASES.map((p) => {
+        const active = p.id.includes(phase);
+        return (
+          <li
+            key={p.label}
+            aria-current={active ? 'step' : undefined}
+            className={`flex-1 rounded-full px-2 py-1 text-center ${
+              active ? 'bg-brand text-white' : 'bg-line/60 text-muted'
+            }`}
+          >
+            {p.label}
+          </li>
+        );
+      })}
+    </ol>
+  );
+}
+
 /** Alur satu topik: materi → latihan → hasil & ringkasan → refleksi (docs/DESAIN_PEMBELAJARAN.md §4). */
-function TopicRunner({ content }: { content: TopicContent }) {
+function TopicRunner({ content, title }: { content: TopicContent; title: string }) {
   const navigate = useNavigate();
   const recordAttempt = useProgress((s) => s.recordAttempt);
   const setStars = useProgress((s) => s.setStars);
@@ -57,6 +86,11 @@ function TopicRunner({ content }: { content: TopicContent }) {
   const problems = content.problems;
   const problem = problems[qi];
 
+  const topicFunctions = useMemo<CognitiveFunctionId[]>(
+    () => [...new Set(problems.flatMap(functionsFor))],
+    [problems],
+  );
+
   const onProblemDone = (o: ProblemOutcome) => {
     recordAttempt({
       problemId: problem.id,
@@ -65,6 +99,7 @@ function TopicRunner({ content }: { content: TopicContent }) {
       hintsUsed: o.hintsUsed,
       misconceptions: o.misconceptions,
       durationMs: o.durationMs,
+      evidence: o.evidence,
       at: new Date().toISOString(),
     });
     const next = [...results, starsForProblem(o.correct, o.tries, o.hintsUsed)];
@@ -83,8 +118,9 @@ function TopicRunner({ content }: { content: TopicContent }) {
     setPhase('practice');
   };
 
+  let body;
   if (phase === 'lesson') {
-    return (
+    body = (
       <LessonView
         step={content.lesson[step]}
         index={step}
@@ -93,10 +129,8 @@ function TopicRunner({ content }: { content: TopicContent }) {
         onNext={() => (step + 1 < content.lesson.length ? setStep(step + 1) : setPhase('practice'))}
       />
     );
-  }
-
-  if (phase === 'practice') {
-    return (
+  } else if (phase === 'practice') {
+    body = (
       <div className="space-y-3">
         <div className="flex items-center justify-between gap-2">
           <p className="text-sm font-bold text-muted">
@@ -113,13 +147,11 @@ function TopicRunner({ content }: { content: TopicContent }) {
         </Modal>
       </div>
     );
-  }
-
-  if (phase === 'result') {
+  } else if (phase === 'result') {
     const correct = results.filter((s) => s > 0).length;
     const topicStars = starsForTopic(results);
     const passed = topicStars > 0;
-    return (
+    body = (
       <div className="space-y-4">
         <Card className="text-center">
           <p className="text-4xl">
@@ -143,21 +175,37 @@ function TopicRunner({ content }: { content: TopicContent }) {
             ↺ Ulangi latihan
           </Button>
           <Button className="flex-1" onClick={() => setPhase('reflect')}>
-            Lanjut →
+            Lanjut ke Jurnal →
           </Button>
         </div>
       </div>
     );
+  } else {
+    body = (
+      <ReflectionForm
+        topicTitle={title}
+        summary={content.summary}
+        functionOptions={topicFunctions}
+        onSkip={() => navigate('/beranda')}
+        onSubmit={({ effort, text, functionsUsed }) => {
+          addReflection({
+            topic: content.topicId,
+            effort,
+            text,
+            functionsUsed,
+            at: new Date().toISOString(),
+          });
+          navigate('/beranda');
+        }}
+      />
+    );
   }
 
   return (
-    <ReflectionForm
-      onSkip={() => navigate('/beranda')}
-      onSubmit={({ effort, text }) => {
-        addReflection({ topic: content.topicId, effort, text, at: new Date().toISOString() });
-        navigate('/beranda');
-      }}
-    />
+    <>
+      <PhaseBar phase={phase} />
+      {body}
+    </>
   );
 }
 

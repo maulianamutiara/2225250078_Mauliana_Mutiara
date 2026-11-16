@@ -6,6 +6,10 @@ export const topic3: TopicContent = {
   topicId: 3,
   lesson: [
     {
+      text: ['Alat berpikir baru: himpunan pasangan berurutan.', 'Kenali dulu bentuk dan kegunaannya.'],
+      visual: { kind: 'tool', tool: 'pairs' },
+    },
+    {
       text: [
         'Setiap panah bisa ditulis sebagai pasangan berurutan (a, b).',
         'a dari himpunan A, b dari himpunan B.',

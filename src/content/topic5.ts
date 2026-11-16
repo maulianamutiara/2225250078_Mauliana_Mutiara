@@ -18,6 +18,14 @@ export const topic5: TopicContent = {
       visual: { kind: 'cartesian', relation: TWICE },
     },
     {
+      text: ['Alat bantu tambahan: tabel.', 'Tabel membantu memeriksa pasangan dengan rapi.'],
+      visual: { kind: 'tool', tool: 'table' },
+    },
+    {
+      text: ['Satu baris tabel = satu pasangan.', 'Apa yang tetap sama di keempat bentuk ini?'],
+      visual: { kind: 'table', relation: TWICE },
+    },
+    {
       text: ['Contoh lain: relasi "faktor dari".', '1 adalah faktor dari 2, 4, dan 6.', 'Jadi, 1 punya tiga panah.'],
       visual: { kind: 'arrow', relation: FACTOR, animate: true },
     },

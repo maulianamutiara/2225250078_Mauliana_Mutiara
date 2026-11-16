@@ -42,6 +42,11 @@ toolbar) → pilih lebar 360px.
 | [docs/ARSITEKTUR.md](docs/ARSITEKTUR.md) | Teknologi, struktur folder, model data | Pengembang |
 | [docs/ROADMAP.md](docs/ROADMAP.md) | Tahapan pengerjaan (milestone & checklist) | Semua |
 | [docs/EVALUASI.md](docs/EVALUASI.md) | Rencana validasi ahli, uji kepraktisan, uji coba | Dosen, peneliti |
+| [docs/RMT.md](docs/RMT.md) | Ringkasan Rigorous Mathematical Thinking & pemetaannya ke fitur | Dosen, pengembang |
+
+## Mediator AI (DeepSeek)
+Buka aplikasi → **⚙️ Pengaturan** → tempel kunci API DeepSeek → **Uji koneksi**. Kunci hanya
+tersimpan di perangkat itu dan **tidak boleh** ditaruh di kode/GitHub (repo ini publik).
 
 ## Urutan membaca yang disarankan
 1. `docs/ANALISIS_KEBUTUHAN.md` → 2. `docs/PRD.md` → 3. `docs/DESAIN_PEMBELAJARAN.md`

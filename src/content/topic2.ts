@@ -6,6 +6,10 @@ export const topic2: TopicContent = {
   topicId: 2,
   lesson: [
     {
+      text: ['Alat berpikir baru: diagram panah.', 'Kenali dulu bentuk dan kegunaannya.'],
+      visual: { kind: 'tool', tool: 'arrow' },
+    },
+    {
       text: [
         'Diagram panah: himpunan A di kiri, himpunan B di kanan.',
         'Contoh relasi: "dua kali dari".',

@@ -2,6 +2,7 @@ import { HashRouter, Navigate, Route, Routes } from 'react-router-dom';
 import { SplashScreen } from './screens/SplashScreen';
 import { HomeScreen } from './screens/HomeScreen';
 import { TopicScreen } from './screens/TopicScreen';
+import { SettingsScreen } from './screens/SettingsScreen';
 
 const routerFuture = { v7_startTransition: true, v7_relativeSplatPath: true };
 
@@ -13,6 +14,7 @@ export default function App() {
         <Route path="/" element={<SplashScreen />} />
         <Route path="/beranda" element={<HomeScreen />} />
         <Route path="/topik/:id" element={<TopicScreen />} />
+        <Route path="/pengaturan" element={<SettingsScreen />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </HashRouter>

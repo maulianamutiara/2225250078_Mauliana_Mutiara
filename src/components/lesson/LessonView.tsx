@@ -5,6 +5,8 @@ import { ArrowDiagram } from '../diagrams/ArrowDiagram';
 import { CartesianGrid } from '../diagrams/CartesianGrid';
 import { PairsView } from '../diagrams/PairsView';
 import { SetView } from '../diagrams/SetView';
+import { TableView } from '../diagrams/TableView';
+import { ToolCard } from '../rmt/ToolCard';
 import { Button } from '../ui/Button';
 
 interface LessonViewProps {
@@ -76,5 +78,9 @@ function VisualView({ visual: v }: { visual: Visual }) {
       return (
         <CartesianGrid relation={v.relation} points={v.relation.pairs.slice(0, v.reveal ?? v.relation.pairs.length)} />
       );
+    case 'table':
+      return <TableView relation={v.relation} reveal={v.reveal} />;
+    case 'tool':
+      return <ToolCard id={v.tool} />;
   }
 }

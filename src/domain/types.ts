@@ -25,6 +25,8 @@ export interface Attempt {
   misconceptions: MisconceptionCode[];
   durationMs: number;
   at: string; // waktu ISO
+  /** Bukti logis yang ditulis siswa setelah menjawab benar (RMT). */
+  evidence?: string;
 }
 
 export interface Reflection {
@@ -32,6 +34,8 @@ export interface Reflection {
   text: string;
   effort: number; // skala usaha mental Paas 1–9
   at: string;
+  /** Jurnal RMT: fungsi kognitif yang menurut siswa ia pakai. */
+  functionsUsed?: string[];
 }
 
 export interface Progress {

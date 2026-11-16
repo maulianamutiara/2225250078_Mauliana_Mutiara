@@ -4,6 +4,7 @@ import { allProblems } from '../../content';
 import { misconceptionMessages } from '../../content/feedback';
 import type { Problem } from '../../content/types';
 import { ProblemView } from './ProblemView';
+import { useAiSettings } from '../../store/aiSettings';
 
 const byId = (id: string) => allProblems.find((p) => p.id === id) as Problem;
 
@@ -62,6 +63,33 @@ describe('ProblemView', () => {
     expect(screen.getByText(/Pembahasan/)).toBeInTheDocument();
     await user.click(screen.getByRole('button', { name: /Lanjut/ }));
     expect(onDone).toHaveBeenCalledWith(expect.objectContaining({ correct: false, tries: 3 }));
+  });
+
+  it('Mediator: tanpa kunci menampilkan petunjuk ke Pengaturan', async () => {
+    useAiSettings.getState().clearKey();
+    const user = userEvent.setup();
+    render(<ProblemView problem={byId('P2-3')} onDone={() => {}} />);
+    await user.click(screen.getByRole('button', { name: /Tanya Mediator/ }));
+    expect(screen.getByText(/Mediator AI belum aktif/)).toBeInTheDocument();
+  });
+
+  it('Mediator: mengirim pertanyaan tanpa kunci jawaban dan menampilkan balasan', async () => {
+    useAiSettings.getState().save({ apiKey: 'sk-test' });
+    const fetchMock = vi.fn(async () =>
+      new Response(JSON.stringify({ choices: [{ message: { content: 'Coba **cek** anggota 4 dulu. Kamu sedang mencari secara sistematis.' } }] }), {
+        status: 200,
+      }),
+    );
+    vi.stubGlobal('fetch', fetchMock);
+    const user = userEvent.setup();
+    render(<ProblemView problem={byId('P2-3')} onDone={() => {}} />);
+    await user.click(screen.getByRole('button', { name: /Tanya Mediator/ }));
+    await user.click(screen.getByRole('button', { name: 'Aku bingung mulai dari mana' }));
+    expect(await screen.findByText(/Coba cek anggota 4 dulu/)).toBeInTheDocument();
+    const body = JSON.parse((fetchMock.mock.calls[0] as unknown as [string, RequestInit])[1].body as string);
+    expect(JSON.stringify(body.messages)).not.toContain('(4, 2)');
+    vi.unstubAllGlobals();
+    useAiSettings.getState().clearKey();
   });
 
   it('diagram panah: ketuk A lalu ketuk B membuat panah', async () => {

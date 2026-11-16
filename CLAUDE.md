@@ -11,6 +11,7 @@ Baca sebelum mengerjakan fitur:
 - `docs/UI_UX.md` — layar, wireframe, spesifikasi interaksi diagram panah
 - `docs/ARSITEKTUR.md` — stack, struktur folder, model data
 - `docs/ROADMAP.md` — urutan kerja; centang item yang selesai
+- `docs/RMT.md` — ringkasan model Rigorous Mathematical Thinking & pemetaannya ke fitur
 
 Jika kode dan dokumen bertentangan, **tanyakan** dulu — jangan diam-diam mengubah salah satunya.
 
@@ -37,8 +38,19 @@ npx cap sync android # setelah build, untuk Android
    Sediakan alternatif "ketuk A lalu ketuk B" untuk membuat panah.
 5. **Mobile-first**: uji di lebar 360px. Target sentuh ≥ 44×44 px.
 6. Akses `localStorage` hanya lewat `src/lib/storage.ts` (dibungkus try/catch).
-7. Tanpa backend, tanpa data pribadi, tanpa SDK analitik pihak ketiga.
-8. Jaga ringan: hindari library besar baru tanpa alasan kuat — sasaran HP Android RAM 2–3 GB.
+7. Tanpa backend, tanpa data pribadi, tanpa SDK analitik pihak ketiga. Satu-satunya layanan luar
+   adalah **Mediator AI DeepSeek** (`src/ai/`), dengan aturan:
+   - Kunci API **tidak pernah** ditulis di kode, `.env` yang di-commit, atau GitHub. Kunci diisi guru di
+     layar ⚙️ Pengaturan dan disimpan lewat `src/store/aiSettings.ts`.
+   - **Kunci jawaban tidak pernah dikirim ke AI** (`relation.pairs`, `answer`). AI hanya menerima soal,
+     jawaban siswa, dan status dari `domain/grading.ts`. Ada tes yang menjaga aturan ini.
+   - Tidak mengirim kode/nama siswa ke AI.
+   - Aplikasi harus tetap berfungsi penuh tanpa AI (AI hanya tambahan).
+8. **Model pembelajaran: Rigorous Mathematical Thinking (RMT)** — lihat `docs/RMT.md`. Setiap soal
+   punya fungsi kognitif (`functionsFor()` di `src/content/rmt.ts`); alat baru dikenalkan lewat kartu
+   **Alat Berpikir** (struktur–fungsi); siswa diminta **bukti logis**; refleksi berupa **jurnal RMT**.
+   Prompt AI mengikuti kriteria mediasi Feuerstein (intensionalitas, transendensi, makna, rasa mampu).
+9. Jaga ringan: hindari library besar baru tanpa alasan kuat — sasaran HP Android RAM 2–3 GB.
 
 ## Aturan Konten & Tampilan (prinsip beban kognitif — jangan dilanggar)
 - Maks **3 kalimat** per layar, tiap kalimat ≤ 20 kata, Bahasa Indonesia sederhana.

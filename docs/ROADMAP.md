@@ -40,6 +40,13 @@ Perkiraan total: **±10 minggu** kerja paruh waktu. Sesuaikan dengan jadwal skri
 - [x] Kartu Ringkasan (F10), layar Hasil + bintang, Refleksi skala usaha 1–9 (F14)
 - [ ] Validasi konten oleh pemilik proyek / ahli materi
 
+## Fase 4b — Model RMT & Mediator AI ✅ selesai 16 Nov 2026
+- [x] Ringkasan RMT & pemetaan ke fitur (`docs/RMT.md`)
+- [x] Katalog 14 fungsi kognitif & 5 alat berpikir (`src/content/rmt.ts`)
+- [x] Kartu Alat Berpikir, label fungsi kognitif, penanda fase, bukti logis, jurnal RMT
+- [x] Mediator AI DeepSeek (tanya di soal, tanggapan bukti & jurnal) + layar ⚙️ Pengaturan
+- [ ] Uji Mediator AI dengan kunci asli dan siswa sungguhan; tinjau kualitas balasan bersama dosen
+
 ## Fase 5 — Platform (minggu 8)
 - [ ] PWA (manifest, ikon, offline)
 - [ ] Capacitor Android → APK debug

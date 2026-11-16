@@ -3,6 +3,7 @@ import { topics } from './topics';
 import { hasPair } from '../domain/relation';
 import type { Pair } from '../domain/types';
 import type { RelationProblem } from './types';
+import { cognitiveFunctions, functionsFor, tools } from './rmt';
 
 const sentences = (text: string) =>
   text
@@ -63,6 +64,34 @@ describe('struktur konten', () => {
       if (!p.given) continue;
       for (const g of p.given) expect(hasPair(p.relation.pairs, g), p.id).toBe(true);
       expect(p.given.length, p.id).toBeLessThan(p.relation.pairs.length);
+    }
+  });
+});
+
+describe('RMT: fungsi kognitif & alat berpikir', () => {
+  it('setiap soal melatih 1–4 fungsi kognitif yang terdaftar, termasuk memberi bukti logis', () => {
+    for (const p of allProblems) {
+      const ids = functionsFor(p);
+      expect(ids.length, p.id).toBeGreaterThanOrEqual(1);
+      expect(ids.length, p.id).toBeLessThanOrEqual(4);
+      for (const id of ids) expect(cognitiveFunctions[id], `${p.id}: ${id}`).toBeDefined();
+      expect(ids, p.id).toContain('evidence');
+    }
+  });
+
+  it('kartu alat berpikir di materi merujuk alat yang terdaftar', () => {
+    const used = topicContents.flatMap((t) =>
+      t.lesson.flatMap((s) => (s.visual?.kind === 'tool' ? [s.visual.tool] : [])),
+    );
+    expect(used.length).toBeGreaterThanOrEqual(5);
+    for (const id of used) expect(tools[id]).toBeDefined();
+  });
+
+  it('definisi fungsi kognitif dan alat cukup singkat (≤ 20 kata)', () => {
+    for (const f of Object.values(cognitiveFunctions)) expect(words(f.definition), f.id).toBeLessThanOrEqual(20);
+    for (const t of Object.values(tools)) {
+      expect(words(t.structure), t.id).toBeLessThanOrEqual(20);
+      expect(words(t.purpose), t.id).toBeLessThanOrEqual(20);
     }
   });
 });

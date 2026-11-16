@@ -23,9 +23,17 @@ export function HomeScreen() {
             Total bintang: {totalStars(stars)}
           </p>
         </div>
-        <Button variant="secondary" onClick={() => setHelpOpen(true)}>
-          ❓ Cara Belajar
-        </Button>
+        <div className="flex flex-col items-end gap-1">
+          <Button variant="secondary" onClick={() => setHelpOpen(true)}>
+            ❓ Cara Belajar
+          </Button>
+          <Link
+            to="/pengaturan"
+            className="inline-flex min-h-touch items-center text-sm font-bold text-muted hover:text-brand"
+          >
+            ⚙️ Pengaturan
+          </Link>
+        </div>
       </header>
 
       <ol className="mt-6 space-y-3">

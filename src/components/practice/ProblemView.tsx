@@ -1,5 +1,11 @@
 import { useRef, useState, type ReactNode } from 'react';
+import { buildEvidenceMessages, buildMediatorMessages } from '../../ai/prompts';
 import { misconceptionMessages, praise } from '../../content/feedback';
+import { functionsFor } from '../../content/rmt';
+import { formatPairs } from '../../domain/relation';
+import { FeedbackButton } from '../ai/FeedbackButton';
+import { MediatorChat } from '../ai/MediatorChat';
+import { FunctionChips } from '../rmt/FunctionChips';
 import type { Problem, RelationProblem } from '../../content/types';
 import { detectMisconceptions, gradePairs } from '../../domain/grading';
 import { hasPair, samePair, sortPairs } from '../../domain/relation';
@@ -17,7 +23,14 @@ export interface ProblemOutcome {
   hintsUsed: number;
   misconceptions: MisconceptionCode[];
   durationMs: number;
+  evidence?: string;
 }
+
+const mediatorSuggestions = [
+  'Aku bingung mulai dari mana',
+  'Apakah jawabanku sudah benar?',
+  'Apa maksud aturannya?',
+];
 
 interface ProblemViewProps {
   problem: Problem;
@@ -45,6 +58,8 @@ export function ProblemView({ problem, onDone }: ProblemViewProps) {
   const [marks, setMarks] = useState<PairMarks | undefined>();
   const [codes, setCodes] = useState<MisconceptionCode[]>([]);
   const [showExplanation, setShowExplanation] = useState(false);
+  const [mediatorOpen, setMediatorOpen] = useState(false);
+  const [evidence, setEvidence] = useState('');
   const started = useRef(Date.now());
 
   const finished = status !== 'answering';
@@ -103,9 +118,16 @@ export function ProblemView({ problem, onDone }: ProblemViewProps) {
       hintsUsed: hintsShown,
       misconceptions: codes,
       durationMs: Date.now() - started.current,
+      evidence: evidence.trim() || undefined,
     });
 
   const canCheck = problem.type === 'mcq' ? choice !== null : pairs.length > 0;
+  const answerText =
+    problem.type === 'mcq'
+      ? choice !== null
+        ? problem.options[choice]
+        : ''
+      : formatPairs(sortPairs(pairs, problem.relation.setA, problem.relation.setB));
 
   return (
     <div className="space-y-4">
@@ -113,6 +135,7 @@ export function ProblemView({ problem, onDone }: ProblemViewProps) {
       {isRel && problem.show && <ShownRepresentation problem={problem} />}
 
       <p className="text-lg font-bold">{problem.prompt}</p>
+      <FunctionChips ids={functionsFor(problem)} />
 
       {/* Area jawaban */}
       {problem.type === 'mcq' && (
@@ -218,6 +241,36 @@ export function ProblemView({ problem, onDone }: ProblemViewProps) {
         </div>
       )}
 
+      {/* Bukti logis (RMT) — setelah jawaban benar */}
+      {status === 'correct' && (
+        <div className="space-y-2 rounded-xl border-2 border-line bg-surface p-3">
+          <label htmlFor={`bukti-${problem.id}`} className="font-bold">
+            ✍️ Bukti logis: mengapa jawabanmu benar?
+          </label>
+          <textarea
+            id={`bukti-${problem.id}`}
+            value={evidence}
+            onChange={(e) => setEvidence(e.target.value)}
+            rows={2}
+            maxLength={400}
+            placeholder="Contoh: karena 6 = 2 × 3, jadi 6 dua kali dari 3."
+            className="w-full rounded-xl border-2 border-line bg-white p-2 focus:border-brand focus:outline-none"
+          />
+          <FeedbackButton
+            disabled={evidence.trim().length < 5}
+            build={() => buildEvidenceMessages(problem, answerText, evidence.trim())}
+          />
+        </div>
+      )}
+
+      {/* Mediator AI */}
+      {mediatorOpen && !finished && (
+        <MediatorChat
+          suggestions={mediatorSuggestions}
+          build={(history, question) => buildMediatorMessages(problem, pairs, choice, history, question)}
+        />
+      )}
+
       {/* Tombol */}
       {!finished ? (
         <div className="flex flex-wrap gap-2">
@@ -227,6 +280,9 @@ export function ProblemView({ problem, onDone }: ProblemViewProps) {
             disabled={hintsShown >= problem.hints.length}
           >
             💡 Hint
+          </Button>
+          <Button variant="secondary" onClick={() => setMediatorOpen((o) => !o)} aria-expanded={mediatorOpen}>
+            🤖 Tanya Mediator
           </Button>
           {isRel && (
             <Button variant="ghost" onClick={() => edit([...given])} disabled={pairs.length === given.length}>

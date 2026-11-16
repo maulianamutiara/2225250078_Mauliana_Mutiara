@@ -5,6 +5,10 @@ export const topic0: TopicContent = {
   topicId: 0,
   lesson: [
     {
+      text: ['Alat berpikir pertama: notasi himpunan.', 'Kenali dulu bentuk dan kegunaannya.'],
+      visual: { kind: 'tool', tool: 'set' },
+    },
+    {
       text: [
         'Himpunan adalah kumpulan benda yang anggotanya jelas.',
         'Himpunan ditulis dengan kurung kurawal { }.',

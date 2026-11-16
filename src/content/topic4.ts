@@ -6,6 +6,10 @@ export const topic4: TopicContent = {
   topicId: 4,
   lesson: [
     {
+      text: ['Alat berpikir baru: diagram Kartesius.', 'Kenali dulu bentuk dan kegunaannya.'],
+      visual: { kind: 'tool', tool: 'cartesian' },
+    },
+    {
       text: ['Diagram Kartesius memakai dua sumbu.', 'Anggota A di sumbu mendatar.', 'Anggota B di sumbu tegak.'],
       visual: { kind: 'cartesian', relation: TWICE, reveal: 0 },
     },

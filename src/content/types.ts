@@ -1,12 +1,16 @@
 import type { AnswerMode } from '../domain/grading';
 import type { Pair, Relation } from '../domain/types';
+import type { CognitiveFunctionId, ToolId } from './rmt';
 
 /** Gambar pendamping di layar materi. `reveal` = banyak pasangan yang sudah ditampilkan. */
 export type Visual =
   | { kind: 'set'; name: string; members: string[]; color: 'A' | 'B' }
   | { kind: 'arrow'; relation: Relation; reveal?: number; animate?: boolean }
   | { kind: 'pairs'; relation: Relation; reveal?: number }
-  | { kind: 'cartesian'; relation: Relation; reveal?: number };
+  | { kind: 'cartesian'; relation: Relation; reveal?: number }
+  | { kind: 'table'; relation: Relation; reveal?: number }
+  /** Kartu "Alat Berpikir" RMT: struktur & fungsi sebuah alat psikologis. */
+  | { kind: 'tool'; tool: ToolId };
 
 export interface LessonStep {
   /** Maks 3 kalimat, tiap kalimat ≤ 20 kata (diuji otomatis). */
@@ -17,6 +21,8 @@ export interface LessonStep {
 interface ProblemBase {
   id: string;
   level: 1 | 2 | 3 | 4;
+  /** Fungsi kognitif RMT yang dilatih. Jika kosong, diturunkan otomatis (rmt.ts). */
+  functions?: CognitiveFunctionId[];
   /** Perintah soal — maks 3 kalimat. */
   prompt: string;
   /** Minimal 2 hint, dari umum ke spesifik. */
