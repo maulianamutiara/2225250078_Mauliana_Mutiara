@@ -1,6 +1,6 @@
 // Katalog Rigorous Mathematical Thinking (RMT) — lihat docs/RMT.md.
 // Fungsi kognitif diadaptasi dari Kinard & Kozulin (2008), Tabel 4.1.
-import type { Problem } from './types';
+import { isRelationProblem, type Problem } from './types';
 
 export type CognitiveFunctionId =
   | 'label'
@@ -183,6 +183,8 @@ const baseByType: Record<Problem['type'], CognitiveFunctionId[]> = {
   arrow: ['search', 'compare'],
   pairs: ['code', 'precise'],
   cartesian: ['space', 'code'],
+  numbers: ['analyze', 'precise'],
+  multi: ['define', 'compare'],
 };
 
 /**
@@ -193,10 +195,11 @@ const baseByType: Record<Problem['type'], CognitiveFunctionId[]> = {
 export function functionsFor(problem: Problem): CognitiveFunctionId[] {
   if (problem.functions?.length) return problem.functions;
   const list: CognitiveFunctionId[] = [];
-  const isRel = problem.type !== 'mcq';
-  if (isRel && problem.story) list.push('define', 'multi');
-  if (isRel && problem.show) list.push('relate', 'constant');
-  if (isRel && problem.given) list.push('prior');
+  if (isRelationProblem(problem)) {
+    if (problem.story) list.push('define', 'multi');
+    if (problem.show) list.push('relate', 'constant');
+    if (problem.given) list.push('prior');
+  }
   list.push(...baseByType[problem.type]);
   const unique = [...new Set(list)].filter((id) => id !== 'evidence').slice(0, 3);
   return [...unique, 'evidence'];

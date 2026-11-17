@@ -47,6 +47,12 @@ Perkiraan total: **±10 minggu** kerja paruh waktu. Sesuaikan dengan jadwal skri
 - [x] Mediator AI DeepSeek (tanya di soal, tanggapan bukti & jurnal) + layar ⚙️ Pengaturan
 - [ ] Uji Mediator AI dengan kunci asli dan siswa sungguhan; tinjau kualitas balasan bersama dosen
 
+## Fase 4c — Soal Literasi Matematika ✅ selesai 17 Nov 2026
+- [x] Topik 7: 4 soal literasi (L1–L4) dari dokumen pemilik, 19 tahap berskor (maks 24)
+- [x] Bentuk soal baru: isian angka, pilih-semua, jelaskan alasan + daftar periksa, coretan diagram panah
+- [x] Skor sebagian per anggota (perMember) untuk tahap diagram panah
+- [ ] Tinjau ulang kalimat tahap-tahap dengan dosen
+
 ## Fase 5 — Platform (minggu 8)
 - [ ] PWA (manifest, ikon, offline)
 - [ ] Capacitor Android → APK debug

@@ -22,9 +22,9 @@ describe('HomeScreen (Peta Belajar)', () => {
     expect(screen.getByText('Soal Cerita')).toBeInTheDocument();
   });
 
-  it('awalnya topik 2–6 terkunci', () => {
+  it('awalnya topik 2–7 terkunci', () => {
     renderHome();
-    expect(screen.getAllByText('🔒 Terkunci')).toHaveLength(5);
+    expect(screen.getAllByText('🔒 Terkunci')).toHaveLength(6);
     expect(screen.getByRole('link', { name: /Apa itu Relasi\?/ })).toBeInTheDocument();
   });
 
@@ -32,7 +32,7 @@ describe('HomeScreen (Peta Belajar)', () => {
     useProgress.getState().setStars('1', 2);
     renderHome();
     expect(screen.getByRole('link', { name: /Diagram Panah/ })).toBeInTheDocument();
-    expect(screen.getAllByText('🔒 Terkunci')).toHaveLength(4);
+    expect(screen.getAllByText('🔒 Terkunci')).toHaveLength(5);
   });
 
   it('membuka dan menutup modal Cara Belajar', async () => {

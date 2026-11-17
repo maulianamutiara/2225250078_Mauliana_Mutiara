@@ -1,5 +1,5 @@
 import { allProblems } from '../content';
-import type { Problem, RelationProblem } from '../content/types';
+import { isRelationProblem, type Problem, type RelationProblem } from '../content/types';
 import { functionsFor, cognitiveFunctions } from '../content/rmt';
 import type { Pair } from '../domain/types';
 import { AiError, chat, cleanReply, DEFAULT_AI_SETTINGS } from './client';
@@ -60,8 +60,8 @@ describe('prompt Mediator (RMT)', () => {
 
   it('kunci jawaban tidak pernah ikut dikirim ke AI', () => {
     for (const p of allProblems) {
-      if (p.type === 'mcq') continue;
-      const text = buildMediatorMessages(p, [], null, [], 'Aku bingung')
+      if (!isRelationProblem(p)) continue;
+      const text = buildMediatorMessages(p, {}, [], 'Aku bingung')
         .map((m) => m.content)
         .join('\n');
       for (const [a, b] of p.relation.pairs) {
@@ -72,8 +72,8 @@ describe('prompt Mediator (RMT)', () => {
 
   it('pilihan ganda: indeks kunci tidak disebut sebelum siswa memilih', () => {
     const p = byId('P3-1');
-    expect(describeAttempt(p, [], null)).toBe('Siswa belum memilih jawaban.');
-    expect(describeAttempt(p, [], 1)).toContain('belum benar');
+    expect(describeAttempt(p, {})).toBe('Siswa belum memilih jawaban.');
+    expect(describeAttempt(p, { choice: 1 })).toContain('belum benar');
   });
 
   it('status menyertakan pesan kesalahan khusus (M1–M7)', () => {
@@ -83,12 +83,12 @@ describe('prompt Mediator (RMT)', () => {
       ['3', '6'],
       ['5', '10'],
     ];
-    expect(describeAttempt(p, answer, null)).toContain('lebih dari satu pasangan');
+    expect(describeAttempt(p, { pairs: answer })).toContain('lebih dari satu pasangan');
   });
 
   it('menyebut fungsi kognitif yang dilatih soal', () => {
     const p = byId('P6-1');
-    const text = buildMediatorMessages(p, [], null, [], 'hai')[0].content;
+    const text = buildMediatorMessages(p, {}, [], 'hai')[0].content;
     for (const id of functionsFor(p)) expect(text).toContain(cognitiveFunctions[id].name.toLowerCase());
   });
 

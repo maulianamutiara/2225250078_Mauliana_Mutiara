@@ -22,6 +22,11 @@ export const topics: Topic[] = [
   { id: 4, title: 'Diagram Kartesius', summary: 'Gambar pasangan sebagai noktah.' },
   { id: 5, title: 'Satu Relasi, Tiga Wajah', summary: 'Ubah dari satu bentuk ke bentuk lain.' },
   { id: 6, title: 'Soal Cerita', summary: 'Pecah soal, lalu selesaikan.' },
+  {
+    id: 7,
+    title: 'Tantangan Literasi Matematika',
+    summary: '4 soal konteks bertahap, skor maksimum 6 per soal.',
+  },
 ];
 
 export function findTopic(id: number): Topic | undefined {

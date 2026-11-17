@@ -121,6 +121,19 @@ Syarat buka level berikutnya: ≥ 70% benar pada level sebelumnya.
 > | 4 Kartesius | P4-1 … P4-5 | Pilihan ganda, Kartesius (L1–L3) |
 > | 5 Tiga Wajah | P5-1 … P5-5 | Ubah bentuk penyajian, "faktor dari", "lebih dari" (L3) |
 > | 6 Soal Cerita | P6-1 … P6-5 | Cerita + Pecah Soal (L4) |
+> | 7 Tantangan Literasi | L1 … L4 (19 tahap) | Soal literasi bertahap berskor (lihat di bawah) |
+>
+> **Topik 7 — Soal Mathematical Literacy** (sumber: dokumen soal & kisi-kisi Mauliana Mutiara).
+> Teks lengkap di `src/content/topic7.ts`. Skor per tahap mengikuti kisi-kisi; maks 6 per soal, total 24.
+>
+> | Soal | Indikator | Tahap di aplikasi |
+> |---|---|---|
+> | L1 Memilih Hari Latihan | Mathematical Reasoning | T1 pilihan ganda (1) · T2 isian angka + coretan diagram panah (2) · T3 bandingkan (1) · T4 keputusan (1) · T5 jelaskan alasan + daftar periksa (1) |
+> | L2 Pesanan Minuman | Formulating Situations Mathematically | T1 pilih semua info penting (1) · T2 himpunan A (1) · T3 himpunan B (1) · T4 notasi (1) · T5 susun pasangan (1) · T6 isian gelas (1) |
+> | L3 Kotak Kue | Employing Concepts, Facts, Procedures | T1 arti "faktor dari" (1) · T2 diagram panah, skor per anggota (2) · T3a pasangan (1) · T3b Kartesius (1) · T4 isian banyak pasangan (1) |
+> | L4 Wahana Permainan | Interpreting, Applying, Evaluating | T1 aturan ≥ (1) · T2–4 diagram panah, skor per anak (3) · T5 pilih semua kesalahan (1) · T6 relasi yang benar (1) |
+>
+> Tahap "jelaskan alasan" dinilai sendiri oleh siswa dengan daftar periksa (bisa ditinjau guru dari data).
 
 ## 8. Katalog Kesalahan Umum (untuk umpan balik spesifik)
 

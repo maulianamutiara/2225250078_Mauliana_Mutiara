@@ -74,6 +74,7 @@ meminta **animasi**, **tarik garis dengan jari**, **umpan balik langsung**, **hi
 | F17 | **Model RMT**: kartu Alat Berpikir (struktur–fungsi), label fungsi kognitif di setiap soal, penanda fase | P0 | Setiap soal punya 1–4 fungsi kognitif termasuk "memberi bukti logis"; ≥ 5 kartu alat (lihat `docs/RMT.md`) |
 | F18 | **Bukti logis** setelah jawaban benar | P0 | Kolom "Mengapa jawabanmu benar?" tersimpan di data percobaan |
 | F19 | **Jurnal RMT** pada refleksi: pilih fungsi kognitif yang dipakai | P1 | Tersimpan bersama refleksi |
+| F21 | **Soal literasi matematika bertahap** (Topik 7): bacaan konteks, tahap berskor sesuai kisi-kisi, ringkasan skor per soal | P0 | 4 soal × maks 6; isian angka, pilih-semua, jelaskan alasan; skor tersimpan per tahap |
 | F20 | **Mediator AI (DeepSeek)**: tanya jawab di soal, tanggapan bukti logis & jurnal | P1 | Tidak memberi jawaban; kunci jawaban tidak dikirim; kunci API diisi di ⚙️ Pengaturan & hanya tersimpan di perangkat; aplikasi tetap jalan tanpa AI |
 
 ## 7. Kebutuhan Non-Fungsional

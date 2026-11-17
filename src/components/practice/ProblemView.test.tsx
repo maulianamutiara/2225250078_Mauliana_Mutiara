@@ -92,6 +92,36 @@ describe('ProblemView', () => {
     useAiSettings.getState().clearKey();
   });
 
+  it('isian angka (literasi): salah ditandai, lalu benar', async () => {
+    const user = userEvent.setup();
+    render(<ProblemView problem={byId('L1-T2')} onDone={() => {}} />);
+    const fill = async (label: string, v: string) => {
+      const input = screen.getByLabelText(label);
+      await user.clear(input);
+      await user.type(input, v);
+    };
+    await fill('Senin', '2');
+    await fill('Rabu', '3');
+    await fill('Kamis', '2');
+    await fill('Jumat', '3');
+    await user.click(screen.getByRole('button', { name: /Cek Jawaban/ }));
+    expect(screen.getByText(/Ada 1 isian yang belum tepat/)).toBeInTheDocument();
+    await fill('Rabu', '4');
+    await user.click(screen.getByRole('button', { name: /Cek Jawaban/ }));
+    expect(screen.getByText('Benar')).toBeInTheDocument();
+  });
+
+  it('pilih semua yang benar (literasi): pilihan berlebih diberi umpan balik khusus', async () => {
+    const user = userEvent.setup();
+    render(<ProblemView problem={byId('L2-T1')} onDone={() => {}} />);
+    for (const name of ['Nama siswa', 'Minuman yang dipesan', 'Di aula']) {
+      await user.click(screen.getByRole('checkbox', { name: new RegExp(name) }));
+    }
+    await user.click(screen.getByRole('button', { name: /Cek Jawaban/ }));
+    expect(screen.getByText(/Tempat acara tidak dipakai/)).toBeInTheDocument();
+    expect(screen.getByText(/Masih ada 1 pilihan benar/)).toBeInTheDocument();
+  });
+
   it('diagram panah: ketuk A lalu ketuk B membuat panah', async () => {
     const user = userEvent.setup();
     const { container } = render(<ProblemView problem={byId('R1-2')} onDone={() => {}} />);

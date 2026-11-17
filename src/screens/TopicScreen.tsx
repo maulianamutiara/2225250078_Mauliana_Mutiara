@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { LessonView } from '../components/lesson/LessonView';
+import { LiteracyRunner, type StageResult } from '../components/literacy/LiteracyRunner';
 import { ProblemView, type ProblemOutcome } from '../components/practice/ProblemView';
 import { ReflectionForm } from '../components/practice/ReflectionForm';
 import { Button } from '../components/ui/Button';
@@ -12,6 +13,7 @@ import { functionsFor, type CognitiveFunctionId } from '../content/rmt';
 import { findTopic } from '../content/topics';
 import type { TopicContent } from '../content/types';
 import { starsForProblem, starsForTopic } from '../domain/grading';
+import { starsForScore } from '../domain/literacy';
 import type { StarCount } from '../domain/types';
 import { useProgress } from '../store/progress';
 
@@ -82,14 +84,39 @@ function TopicRunner({ content, title }: { content: TopicContent; title: string 
   const [qi, setQi] = useState(0);
   const [results, setResults] = useState<StarCount[]>([]);
   const [summaryOpen, setSummaryOpen] = useState(false);
+  const [litResults, setLitResults] = useState<StageResult[] | null>(null);
 
   const problems = content.problems;
   const problem = problems[qi];
+  const literacy = content.literacy;
 
   const topicFunctions = useMemo<CognitiveFunctionId[]>(
-    () => [...new Set(problems.flatMap(functionsFor))],
-    [problems],
+    () => [
+      ...new Set([
+        ...problems.flatMap(functionsFor),
+        ...(literacy ?? []).flatMap((t) =>
+          t.stages.flatMap((s) =>
+            s.item.type === 'explain'
+              ? (s.item.functions ?? (['evidence'] as CognitiveFunctionId[]))
+              : functionsFor(s.item),
+          ),
+        ),
+      ]),
+    ],
+    [problems, literacy],
   );
+
+  const record = (problemId: string, o: ProblemOutcome) =>
+    recordAttempt({
+      problemId,
+      correct: o.correct,
+      tries: o.tries,
+      hintsUsed: o.hintsUsed,
+      misconceptions: o.misconceptions,
+      durationMs: o.durationMs,
+      evidence: o.evidence,
+      at: new Date().toISOString(),
+    });
 
   const onProblemDone = (o: ProblemOutcome) => {
     recordAttempt({
@@ -114,9 +141,13 @@ function TopicRunner({ content, title }: { content: TopicContent; title: string 
 
   const restartPractice = () => {
     setResults([]);
+    setLitResults(null);
     setQi(0);
     setPhase('practice');
   };
+
+  const litTotal = (litResults ?? []).reduce((s, r) => s + r.score, 0);
+  const litMax = (literacy ?? []).reduce((s, t) => s + t.stages.reduce((a, st) => a + st.score, 0), 0);
 
   let body;
   if (phase === 'lesson') {
@@ -128,6 +159,70 @@ function TopicRunner({ content, title }: { content: TopicContent; title: string 
         onBack={() => setStep((s) => Math.max(0, s - 1))}
         onNext={() => (step + 1 < content.lesson.length ? setStep(step + 1) : setPhase('practice'))}
       />
+    );
+  } else if (phase === 'practice' && literacy) {
+    body = (
+      <div className="space-y-3">
+        <div className="flex justify-end">
+          <Button variant="ghost" onClick={() => setSummaryOpen(true)}>
+            📘 Ringkasan
+          </Button>
+        </div>
+        <LiteracyRunner
+          tasks={literacy}
+          onRecord={record}
+          onComplete={(r) => {
+            const total = r.reduce((s, x) => s + x.score, 0);
+            setLitResults(r);
+            setStars(String(content.topicId), starsForScore(total, litMax));
+            setPhase('result');
+          }}
+        />
+        <Modal open={summaryOpen} title="Ringkasan" onClose={() => setSummaryOpen(false)}>
+          <SummaryList items={content.summary} />
+        </Modal>
+      </div>
+    );
+  } else if (phase === 'result' && literacy) {
+    const topicStars = starsForScore(litTotal, litMax);
+    body = (
+      <div className="space-y-4">
+        <Card className="space-y-3 text-center">
+          <p className="text-4xl">
+            <Stars value={topicStars} />
+          </p>
+          <p className="text-xl font-bold">
+            Skor literasi: {litTotal} / {litMax}
+          </p>
+          <table className="mx-auto w-full max-w-sm border-collapse text-left">
+            <tbody>
+              {literacy.map((t) => {
+                const s = (litResults ?? []).filter((r) => r.taskId === t.id).reduce((a, r) => a + r.score, 0);
+                const m = t.stages.reduce((a, st) => a + st.score, 0);
+                return (
+                  <tr key={t.id}>
+                    <td className="border-b border-line py-1">{t.title}</td>
+                    <td className="border-b border-line py-1 text-right font-bold">
+                      {s} / {m}
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+          <p className="text-muted">
+            {topicStars > 0 ? 'Hebat! Kamu berpikir dengan teliti.' : 'Butuh minimal 70% skor. Yuk, coba lagi!'}
+          </p>
+        </Card>
+        <div className="flex flex-wrap gap-2">
+          <Button variant="secondary" onClick={restartPractice}>
+            ↺ Ulangi
+          </Button>
+          <Button className="flex-1" onClick={() => setPhase('reflect')}>
+            Lanjut ke Jurnal →
+          </Button>
+        </div>
+      </div>
     );
   } else if (phase === 'practice') {
     body = (

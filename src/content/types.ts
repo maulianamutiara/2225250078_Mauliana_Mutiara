@@ -50,12 +50,66 @@ export interface RelationProblem extends ProblemBase {
   story?: string;
 }
 
-export type Problem = McqProblem | RelationProblem;
+/** Isian angka, mis. "banyak anggota yang hadir hari Rabu". */
+export interface NumbersProblem extends ProblemBase {
+  type: 'numbers';
+  fields: { label: string; answer: number }[];
+  /** Diagram panah coretan (tidak dinilai) untuk membantu menghitung. */
+  helper?: Relation;
+}
+
+/** Pilih semua jawaban yang benar. */
+export interface MultiProblem extends ProblemBase {
+  type: 'multi';
+  options: string[];
+  answers: number[];
+  optionFeedback?: Record<number, string>;
+}
+
+export type Problem = McqProblem | RelationProblem | NumbersProblem | MultiProblem;
+
+export function isRelationProblem(p: Problem): p is RelationProblem {
+  return p.type === 'arrow' || p.type === 'pairs' || p.type === 'cartesian';
+}
+
+/** Tahap "jelaskan alasanmu": dibandingkan dengan contoh jawaban + daftar periksa (penilaian diri). */
+export interface ExplainStage {
+  id: string;
+  type: 'explain';
+  prompt: string;
+  model: string;
+  checklist: string[];
+  functions?: CognitiveFunctionId[];
+}
+
+/** Satu tahap soal literasi, mengikuti kisi-kisi penskoran. */
+export interface LiteracyStage {
+  /** Label tahap sesuai kisi-kisi, mis. "1", "3a", "2–4". */
+  tahap: string;
+  score: number;
+  /** "perMember": skor sebagian menurut banyak anggota A yang pasangannya tepat. */
+  scoring?: 'all' | 'perMember';
+  item: Problem | ExplainStage;
+}
+
+/** Soal literasi matematika: konteks + beberapa tahap berskor. */
+export interface LiteracyTask {
+  id: string;
+  title: string;
+  indicator: string;
+  indicatorDescription: string;
+  /** Bacaan soal; tiap kalimat ≤ 20 kata. */
+  story: string[];
+  question: string;
+  stages: LiteracyStage[];
+}
 
 export interface TopicContent {
   topicId: number;
   lesson: LessonStep[];
   problems: Problem[];
+  /** Soal literasi bertahap (Topik 7). */
+  literacy?: LiteracyTask[];
   /** Kartu ringkasan — maks 3 poin. */
   summary: string[];
 }

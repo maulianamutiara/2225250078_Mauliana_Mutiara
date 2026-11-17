@@ -2,18 +2,18 @@ import { useRef, useState, type ReactNode } from 'react';
 import { buildEvidenceMessages, buildMediatorMessages } from '../../ai/prompts';
 import { misconceptionMessages, praise } from '../../content/feedback';
 import { functionsFor } from '../../content/rmt';
-import { formatPairs } from '../../domain/relation';
+import { isRelationProblem, type Problem, type RelationProblem } from '../../content/types';
+import { detectMisconceptions, gradePairs } from '../../domain/grading';
+import { gradeMulti, gradeNumbers } from '../../domain/literacy';
+import { formatPairs, hasPair, samePair, sortPairs } from '../../domain/relation';
+import type { MisconceptionCode, Pair, Relation } from '../../domain/types';
 import { FeedbackButton } from '../ai/FeedbackButton';
 import { MediatorChat } from '../ai/MediatorChat';
-import { FunctionChips } from '../rmt/FunctionChips';
-import type { Problem, RelationProblem } from '../../content/types';
-import { detectMisconceptions, gradePairs } from '../../domain/grading';
-import { hasPair, samePair, sortPairs } from '../../domain/relation';
-import type { MisconceptionCode, Pair } from '../../domain/types';
 import { ArrowDiagram, type PairMarks } from '../diagrams/ArrowDiagram';
 import { CartesianGrid } from '../diagrams/CartesianGrid';
 import { PairBuilder } from '../diagrams/PairBuilder';
 import { PairsView } from '../diagrams/PairsView';
+import { FunctionChips } from '../rmt/FunctionChips';
 import { Button } from '../ui/Button';
 import { StoryText } from './StoryText';
 
@@ -24,6 +24,8 @@ export interface ProblemOutcome {
   misconceptions: MisconceptionCode[];
   durationMs: number;
   evidence?: string;
+  /** Pasangan terakhir siswa (soal relasi) — untuk skor sebagian di soal literasi. */
+  answer?: Pair[];
 }
 
 const mediatorSuggestions = [
@@ -35,6 +37,8 @@ const mediatorSuggestions = [
 interface ProblemViewProps {
   problem: Problem;
   onDone: (outcome: ProblemOutcome) => void;
+  /** Bacaan soal literasi, dikirim ke Mediator sebagai konteks. */
+  context?: string;
 }
 
 /** Setelah 3 kali salah, pembahasan ditampilkan dan siswa boleh lanjut. */
@@ -46,11 +50,19 @@ const instructions: Record<RelationProblem['type'], string> = {
   cartesian: 'Ketuk titik temu untuk menaruh noktah. Ketuk lagi untuk menghapus.',
 };
 
-export function ProblemView({ problem, onDone }: ProblemViewProps) {
-  const isRel = problem.type !== 'mcq';
-  const given = isRel ? (problem.given ?? []) : [];
+const LETTERS = 'ABCDEFG';
+
+export function ProblemView({ problem, onDone, context }: ProblemViewProps) {
+  const isRel = isRelationProblem(problem);
+  const given = isRelationProblem(problem) ? (problem.given ?? []) : [];
   const [pairs, setPairs] = useState<Pair[]>([...given]);
   const [choice, setChoice] = useState<number | null>(null);
+  const [values, setValues] = useState<string[]>(() =>
+    problem.type === 'numbers' ? problem.fields.map(() => '') : [],
+  );
+  const [selected, setSelected] = useState<number[]>([]);
+  const [numberWrong, setNumberWrong] = useState<number[] | null>(null);
+  const [multiMarks, setMultiMarks] = useState<{ missing: number[]; extra: number[] } | null>(null);
   const [tries, setTries] = useState(0);
   const [hintsShown, setHintsShown] = useState(0);
   const [status, setStatus] = useState<'answering' | 'correct' | 'failed'>('answering');
@@ -63,6 +75,7 @@ export function ProblemView({ problem, onDone }: ProblemViewProps) {
   const started = useRef(Date.now());
 
   const finished = status !== 'answering';
+  const parsedValues = values.map((v) => (v.trim() === '' ? null : Number(v)));
 
   const edit = (next: Pair[]) => {
     setPairs(next);
@@ -84,6 +97,21 @@ export function ProblemView({ problem, onDone }: ProblemViewProps) {
       if (!correct && choice !== null) {
         messages = [problem.optionFeedback?.[choice] ?? 'Belum tepat. Baca lagi soalnya pelan-pelan.'];
       }
+    } else if (problem.type === 'numbers') {
+      const result = gradeNumbers(parsedValues, problem.fields.map((f) => f.answer));
+      correct = result.correct;
+      setNumberWrong(result.wrong);
+      if (!correct) messages = [`Ada ${result.wrong.length} isian yang belum tepat. Periksa lagi yang bertanda ✕.`];
+    } else if (problem.type === 'multi') {
+      const result = gradeMulti(selected, problem.answers);
+      correct = result.correct;
+      setMultiMarks(result);
+      messages = [
+        ...result.extra.map(
+          (i) => problem.optionFeedback?.[i] ?? `Pilihan "${problem.options[i]}" seharusnya tidak dipilih.`,
+        ),
+        ...(result.missing.length ? [`Masih ada ${result.missing.length} pilihan benar yang belum kamu pilih.`] : []),
+      ];
     } else {
       const result = gradePairs(pairs, problem.relation);
       const found = detectMisconceptions(result, pairs, problem.relation, problem.type);
@@ -119,25 +147,34 @@ export function ProblemView({ problem, onDone }: ProblemViewProps) {
       misconceptions: codes,
       durationMs: Date.now() - started.current,
       evidence: evidence.trim() || undefined,
+      answer: isRel ? pairs : undefined,
     });
 
-  const canCheck = problem.type === 'mcq' ? choice !== null : pairs.length > 0;
-  const answerText =
-    problem.type === 'mcq'
-      ? choice !== null
-        ? problem.options[choice]
-        : ''
-      : formatPairs(sortPairs(pairs, problem.relation.setA, problem.relation.setB));
+  let canCheck: boolean;
+  let answerText: string;
+  if (problem.type === 'mcq') {
+    canCheck = choice !== null;
+    answerText = choice !== null ? problem.options[choice] : '';
+  } else if (problem.type === 'numbers') {
+    canCheck = values.every((v) => v.trim() !== '');
+    answerText = problem.fields.map((f, i) => `${f.label} = ${values[i]}`).join(', ');
+  } else if (problem.type === 'multi') {
+    canCheck = selected.length > 0;
+    answerText = [...selected].sort().map((i) => problem.options[i]).join('; ');
+  } else {
+    canCheck = pairs.length > 0;
+    answerText = formatPairs(sortPairs(pairs, problem.relation.setA, problem.relation.setB));
+  }
 
   return (
     <div className="space-y-4">
-      {isRel && problem.story && <StoryText problem={problem} />}
-      {isRel && problem.show && <ShownRepresentation problem={problem} />}
+      {isRelationProblem(problem) && problem.story && <StoryText problem={problem} />}
+      {isRelationProblem(problem) && problem.show && <ShownRepresentation problem={problem} />}
 
       <p className="text-lg font-bold">{problem.prompt}</p>
       <FunctionChips ids={functionsFor(problem)} />
 
-      {/* Area jawaban */}
+      {/* Area jawaban: pilihan ganda */}
       {problem.type === 'mcq' && (
         <div className="space-y-2" role="radiogroup" aria-label="Pilihan jawaban">
           {problem.options.map((opt, i) => {
@@ -155,18 +192,9 @@ export function ProblemView({ problem, onDone }: ProblemViewProps) {
                   setChoice(i);
                   setFeedback([]);
                 }}
-                className={[
-                  'flex min-h-touch w-full items-center gap-3 rounded-xl border-2 px-4 py-2 text-left',
-                  showRight
-                    ? 'border-ok bg-green-50'
-                    : showWrong
-                      ? 'border-fix bg-red-50'
-                      : picked
-                        ? 'border-brand bg-brand-soft'
-                        : 'border-line bg-surface',
-                ].join(' ')}
+                className={optionClass(showRight, showWrong, picked)}
               >
-                <span className="font-bold text-brand">{String.fromCharCode(65 + i)}.</span>
+                <span className="font-bold text-brand">{LETTERS[i]}.</span>
                 <span className="flex-1">{opt}</span>
                 {showRight && <span className="font-bold text-ok">✓</span>}
                 {showWrong && <span className="font-bold text-fix">✕</span>}
@@ -176,7 +204,87 @@ export function ProblemView({ problem, onDone }: ProblemViewProps) {
         </div>
       )}
 
-      {isRel && (
+      {/* Area jawaban: pilih semua yang benar */}
+      {problem.type === 'multi' && (
+        <div className="space-y-2" role="group" aria-label="Pilih semua yang benar">
+          <p className="text-sm text-muted">Boleh pilih lebih dari satu.</p>
+          {problem.options.map((opt, i) => {
+            const picked = selected.includes(i);
+            const showRight = finished && problem.answers.includes(i);
+            const showWrong = !!multiMarks?.extra.includes(i) && picked;
+            return (
+              <button
+                key={opt}
+                type="button"
+                role="checkbox"
+                aria-checked={picked}
+                disabled={finished}
+                onClick={() => {
+                  setSelected((s) => (s.includes(i) ? s.filter((x) => x !== i) : [...s, i]));
+                  setMultiMarks(null);
+                  setFeedback([]);
+                }}
+                className={optionClass(showRight, showWrong, picked)}
+              >
+                <span className="font-bold text-brand" aria-hidden>
+                  {picked ? '☑' : '☐'}
+                </span>
+                <span className="flex-1">{opt}</span>
+                {showRight && <span className="font-bold text-ok">✓</span>}
+                {showWrong && <span className="font-bold text-fix">✕</span>}
+              </button>
+            );
+          })}
+        </div>
+      )}
+
+      {/* Area jawaban: isian angka */}
+      {problem.type === 'numbers' && (
+        <div className="space-y-3">
+          {problem.helper && !finished && <HelperDiagram relation={problem.helper} />}
+          <div className="grid gap-2 sm:grid-cols-2">
+            {problem.fields.map((f, i) => {
+              const wrong = !!numberWrong?.includes(i);
+              const ok = numberWrong !== null && !wrong;
+              return (
+                <div
+                  key={f.label}
+                  className={`flex items-center justify-between gap-2 rounded-xl border-2 px-3 py-1 ${
+                    wrong ? 'border-fix bg-red-50' : ok ? 'border-ok bg-green-50' : 'border-line bg-surface'
+                  }`}
+                >
+                  <label htmlFor={`isian-${problem.id}-${i}`} className="font-bold">
+                    {f.label}
+                  </label>
+                  <span className="flex items-center gap-1">
+                    <input
+                      id={`isian-${problem.id}-${i}`}
+                      type="number"
+                      inputMode="numeric"
+                      min={0}
+                      value={values[i]}
+                      disabled={finished}
+                      onChange={(e) => {
+                        const next = [...values];
+                        next[i] = e.target.value;
+                        setValues(next);
+                        setNumberWrong(null);
+                        setFeedback([]);
+                      }}
+                      className="min-h-touch w-20 rounded-lg border-2 border-line bg-white px-2 text-center text-lg focus:border-brand focus:outline-none"
+                    />
+                    {ok && <span className="font-bold text-ok">✓</span>}
+                    {wrong && <span className="font-bold text-fix">✕</span>}
+                  </span>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      {/* Area jawaban: relasi */}
+      {isRelationProblem(problem) && (
         <>
           <p className="text-sm text-muted">{instructions[problem.type]}</p>
           <div className={finished ? 'pointer-events-none' : undefined}>
@@ -258,7 +366,7 @@ export function ProblemView({ problem, onDone }: ProblemViewProps) {
           />
           <FeedbackButton
             disabled={evidence.trim().length < 5}
-            build={() => buildEvidenceMessages(problem, answerText, evidence.trim())}
+            build={() => buildEvidenceMessages(problem, answerText, evidence.trim(), context)}
           />
         </div>
       )}
@@ -267,7 +375,15 @@ export function ProblemView({ problem, onDone }: ProblemViewProps) {
       {mediatorOpen && !finished && (
         <MediatorChat
           suggestions={mediatorSuggestions}
-          build={(history, question) => buildMediatorMessages(problem, pairs, choice, history, question)}
+          build={(history, question) =>
+            buildMediatorMessages(
+              problem,
+              { pairs, choice, values: parsedValues, selected },
+              history,
+              question,
+              context,
+            )
+          }
         />
       )}
 
@@ -305,6 +421,41 @@ export function ProblemView({ problem, onDone }: ProblemViewProps) {
           </Button>
         </div>
       )}
+    </div>
+  );
+}
+
+function optionClass(showRight: boolean, showWrong: boolean, picked: boolean): string {
+  return [
+    'flex min-h-touch w-full items-center gap-3 rounded-xl border-2 px-4 py-2 text-left',
+    showRight
+      ? 'border-ok bg-green-50'
+      : showWrong
+        ? 'border-fix bg-red-50'
+        : picked
+          ? 'border-brand bg-brand-soft'
+          : 'border-line bg-surface',
+  ].join(' ');
+}
+
+/** Kotak coretan: diagram panah bebas untuk membantu menghitung (tidak dinilai). */
+function HelperDiagram({ relation }: { relation: Relation }) {
+  const [scratch, setScratch] = useState<Pair[]>([]);
+  return (
+    <div className="space-y-1 rounded-xl border-2 border-dashed border-line bg-surface p-3">
+      <div className="flex items-center justify-between gap-2">
+        <p className="text-sm font-bold">✏️ Coretan diagram panah (tidak dinilai)</p>
+        <Button variant="ghost" className="text-sm" onClick={() => setScratch([])} disabled={scratch.length === 0}>
+          Bersihkan
+        </Button>
+      </div>
+      <ArrowDiagram
+        relation={{ ...relation, pairs: [] }}
+        pairs={scratch}
+        interactive
+        onAdd={(p) => setScratch((s) => [...s, p])}
+        onRemove={(p) => setScratch((s) => s.filter((q) => !samePair(p, q)))}
+      />
     </div>
   );
 }

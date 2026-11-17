@@ -2,7 +2,9 @@ import { allProblems, topicContents } from './index';
 import { topics } from './topics';
 import { hasPair } from '../domain/relation';
 import type { Pair } from '../domain/types';
-import type { RelationProblem } from './types';
+import { isRelationProblem, type NumbersProblem, type RelationProblem } from './types';
+import { CAKE, DAYS, DRINKS, literacyTasks, RIDES } from './topic7';
+import type { Relation } from '../domain/types';
 import { cognitiveFunctions, functionsFor, tools } from './rmt';
 
 const sentences = (text: string) =>
@@ -12,7 +14,7 @@ const sentences = (text: string) =>
     .filter(Boolean);
 const words = (s: string) => s.split(/\s+/).filter(Boolean).length;
 
-const relationProblems = allProblems.filter((p): p is RelationProblem => p.type !== 'mcq');
+const relationProblems = allProblems.filter((p): p is RelationProblem => isRelationProblem(p));
 
 describe('struktur konten', () => {
   it('setiap topik di Peta Belajar punya konten', () => {
@@ -64,6 +66,56 @@ describe('struktur konten', () => {
       if (!p.given) continue;
       for (const g of p.given) expect(hasPair(p.relation.pairs, g), p.id).toBe(true);
       expect(p.given.length, p.id).toBeLessThan(p.relation.pairs.length);
+    }
+  });
+});
+
+describe('soal literasi matematika (Topik 7)', () => {
+  const inDegree = (r: Relation, b: string) => r.pairs.filter((p) => p[1] === b).length;
+  const fields = (id: string) =>
+    (allProblems.find((p) => p.id === id) as NumbersProblem).fields.map((f) => f.answer);
+
+  it('ada 4 soal, masing-masing skor maksimum 6 sesuai kisi-kisi', () => {
+    expect(literacyTasks).toHaveLength(4);
+    for (const t of literacyTasks) {
+      expect(t.stages.reduce((s, st) => s + st.score, 0), t.id).toBe(6);
+    }
+  });
+
+  it('banyak pasangan sesuai kisi-kisi', () => {
+    expect(DAYS.pairs).toHaveLength(11);
+    expect(DRINKS.pairs).toHaveLength(7);
+    expect(CAKE.pairs).toHaveLength(8);
+    expect(RIDES.pairs).toHaveLength(6);
+  });
+
+  it('isian angka konsisten dengan relasinya', () => {
+    expect(fields('L1-T2')).toEqual(DAYS.setB.map((d) => inDegree(DAYS, d))); // 2, 4, 2, 3
+    expect(fields('L2-T6')).toEqual([...DRINKS.setB.map((b) => inDegree(DRINKS, b)), DRINKS.pairs.length]);
+    expect(fields('L3-T4')).toEqual([CAKE.pairs.length, ...CAKE.setB.map((b) => inDegree(CAKE, b))]);
+  });
+
+  it('relasi wahana sesuai aturan tinggi ≥ batas', () => {
+    const height: Record<string, number> = { Bayu: 115, Caca: 128, Dimas: 140 };
+    const limit: Record<string, number> = { 'komidi putar': 100, 'kereta luncur': 120, 'roller coaster': 135 };
+    const expected = RIDES.setA.flatMap((a) => RIDES.setB.filter((b) => height[a] >= limit[b]).map((b) => `${a}|${b}`));
+    expect(RIDES.pairs.map((p) => p.join('|')).sort()).toEqual(expected.sort());
+  });
+
+  it('kunci pilih-semua valid dan setiap tahap punya hint', () => {
+    for (const t of literacyTasks) {
+      for (const s of t.stages) {
+        const item = s.item;
+        if (item.type === 'multi') for (const a of item.answers) expect(a).toBeLessThan(item.options.length);
+        if (item.type === 'explain') expect(item.checklist.length).toBeGreaterThanOrEqual(2);
+        else expect(item.hints.length, item.id).toBeGreaterThanOrEqual(2);
+      }
+    }
+  });
+
+  it('kalimat bacaan soal ≤ 20 kata', () => {
+    for (const t of literacyTasks) {
+      for (const line of t.story) for (const s of sentences(line)) expect(words(s), `${t.id}: "${s}"`).toBeLessThanOrEqual(20);
     }
   });
 });
