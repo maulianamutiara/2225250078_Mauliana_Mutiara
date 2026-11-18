@@ -10,7 +10,7 @@
 | Soal | Jawaban S01 | Kebenaran hasil akhir |
 |---|---|---|
 | L1 Hari latihan | Senin 2, Rabu 4, Kamis 2, Jumat 3 → pilih Rabu "karena paling banyak anggotanya" | ✓ benar |
-| L2 Pesanan minuman | 7 pasangan berurutan; es teh 3, jus jeruk 2, air mineral 2; total 7 gelas | ✓ benar (nama "Alno" tertulis "Rino") |
+| L2 Pesanan minuman | 7 pasangan berurutan; es teh 3, jus jeruk 2, air mineral 2; total 7 gelas | ✓ benar |
 | L3 Kotak kue | {(2,12), (2,20), (3,12), (3,15), (4,12), (4,20), (5,15), (5,20)}; 8 pasangan | ✓ benar |
 | L4 Wahana | "Tidak setuju"; 6 pasangan (anak, wahana) yang benar | ✓ benar, urutan (a, b) sudah tepat |
 
@@ -51,7 +51,7 @@ Tanda ⚖️ = tahap yang perlu disepakati dengan dosen (bukti hanya tersirat da
 | 4 Wahana Permainan | 5 | 6 |
 | **Total** | **18** | **24** |
 
-**Nilai = 18 / 24 × 100 = 75.** Jika tahap ⚖️ dinilai lebih ketat/longgar, rentang skor 15–19 (nilai 62,5–79,2).
+**Nilai = 18 / 24 × 100 = 75.** Jika tahap ⚖️ dinilai lebih ketat/longgar, rentang skor 15–20 (nilai 62,5–83,3).
 
 **Temuan:** semua hasil akhir benar, tetapi skor hilang pada tahap **menuliskan proses**: himpunan A/B,
 informasi penting, diagram Cartesius, perbandingan, dan menyebut kesalahan. Soal di kertas tidak meminta
@@ -65,7 +65,6 @@ tahap-tahap itu secara eksplisit, sehingga instrumen sebaiknya menulis perintah 
 | Langsung menulis pasangan; tidak menulis himpunan A/B dan tidak menggambar diagram panah | Intrinsik | IL03 (diagram ruwet) | Diagram panah interaktif; tahap himpunan asal/kawan di L2 |
 | Alasan sangat singkat ("paling banyak anggotanya"; "hanya satu wahana") | Germane rendah | GL04, GL06 | ✍️ Bukti logis; Asisten "Aku mau cek alasanku" (petunjuk tingkat 4) |
 | L4: urutan dibetulkan diam-diam, tetapi kesalahan urutan tidak disebut | Germane (evaluasi) | IL05 | L4 T5 "pilih semua kesalahan"; umpan balik M1 (urutan terbalik) |
-| Salah salin nama (Alno → Rino) | Ekstrinsik | EL01, EL02 | Siswa mengetuk pilihan, tidak menyalin ulang nama |
 
 ## 4. Kesimpulan untuk pengembangan aplikasi
 1. S01 kuat pada **prosedur** (Employing), lemah pada **menjelaskan dan mengevaluasi** (Reasoning, Interpreting/Evaluating).
