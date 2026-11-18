@@ -3,7 +3,7 @@
 //   tidak pernah dikirim ke browser dan tidak pernah masuk GitHub.
 // - Prompt sistem (aturan pedagogis) disusun DI SINI, bukan di browser.
 // Dipakai oleh: api/chat.ts (Vercel) dan middleware dev di vite.config.ts (npm run dev).
-import { buildServerMessages, MAX_TOKENS, validateRequest } from '../src/ai/pedagogy';
+import { buildServerMessages, MAX_TOKENS, validateRequest } from '../src/ai/pedagogy.js';
 
 export interface ProxyEnv {
   DEEPSEEK_API_KEY?: string;
