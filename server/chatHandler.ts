@@ -109,10 +109,15 @@ export async function handleChat(req: Request, env: ProxyEnv, fetchImpl: typeof 
   }
 
   if (!upstream.ok) {
-    if (upstream.status === 402) return json(402, { error: 'balance' }, headers);
-    if (upstream.status === 429) return json(429, { error: 'rate' }, headers);
-    if (upstream.status === 401 || upstream.status === 403) return json(502, { error: 'upstream-auth' }, headers);
-    return json(502, { error: 'upstream' }, headers);
+    // Keterangan diagnosis untuk guru: layanan yang dihubungi + kode status. Tanpa kunci, tanpa isi galat.
+    const diag = { provider: new URL(base).host, status: upstream.status };
+    // Isi galat dari layanan AI hanya dicatat di log server (Vercel → Logs), tidak dikirim ke browser.
+    const detail = (await upstream.text().catch(() => '')).slice(0, 300).split(apiKey).join('[kunci]');
+    console.error(`[chat] layanan AI menolak (${diag.provider} ${diag.status}): ${detail}`);
+    if (upstream.status === 402) return json(402, { error: 'balance', ...diag }, headers);
+    if (upstream.status === 429) return json(429, { error: 'rate', ...diag }, headers);
+    if (upstream.status === 401 || upstream.status === 403) return json(502, { error: 'upstream-auth', ...diag }, headers);
+    return json(502, { error: 'upstream', ...diag }, headers);
   }
 
   const data = (await upstream.json().catch(() => null)) as

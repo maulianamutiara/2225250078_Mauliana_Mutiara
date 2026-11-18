@@ -81,7 +81,9 @@ describe('backend /api/chat', () => {
     expect((await handleChat(post(body), env, upstream(402, {}))).status).toBe(402);
     const bad = await handleChat(post(body), env, upstream(401, { error: KEY }));
     expect(bad.status).toBe(502);
-    expect(await bad.text()).not.toContain(KEY);
+    const text = await bad.text();
+    expect(text).not.toContain(KEY);
+    expect(JSON.parse(text)).toEqual({ error: 'upstream-auth', provider: 'api.deepseek.com', status: 401 });
   });
 
   it('429 bila terlalu banyak permintaan dari satu perangkat', async () => {
