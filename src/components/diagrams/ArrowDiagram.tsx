@@ -1,5 +1,5 @@
 import { useId, useRef, useState, type PointerEvent as ReactPointerEvent } from 'react';
-import { hasPair, outDegree } from '../../domain/relation';
+import { hasPair, outDegree, samePair } from '../../domain/relation';
 import type { Member, Pair, Relation } from '../../domain/types';
 
 export interface PairMarks {
@@ -21,6 +21,8 @@ interface ArrowDiagramProps {
   marks?: PairMarks;
   /** Animasikan panah mulai dari indeks ini (untuk materi langkah demi langkah). */
   animateFrom?: number;
+  /** Panah yang sedang dibahas animasi (disorot hijau toska, lebih tebal). */
+  highlight?: Pair;
 }
 
 const W = 360;
@@ -37,6 +39,7 @@ const COLORS = {
   ok: '#16A34A',
   fix: '#B91C1C',
   missing: '#A8A29E',
+  brand: '#0F766E',
 };
 
 /**
@@ -54,6 +57,7 @@ export function ArrowDiagram({
   onMessage,
   marks,
   animateFrom,
+  highlight,
 }: ArrowDiagramProps) {
   const uid = useId().replace(/:/g, '');
   const svgRef = useRef<SVGSVGElement>(null);
@@ -145,6 +149,7 @@ export function ArrowDiagram({
   const arrowStyle = (p: Pair) => {
     if (hasPair(wrong, p)) return { color: COLORS.fix, dash: '6 4', marker: 'fix' };
     if (marks?.checked) return { color: COLORS.ok, dash: undefined, marker: 'ok' };
+    if (highlight && samePair(p, highlight)) return { color: COLORS.brand, dash: undefined, marker: 'brand' };
     return { color: COLORS.arrow, dash: undefined, marker: 'arrow' };
   };
 
@@ -167,7 +172,7 @@ export function ArrowDiagram({
       onPointerCancel={() => setDrag(null)}
     >
       <defs>
-        {(Object.entries({ arrow: COLORS.arrow, ok: COLORS.ok, fix: COLORS.fix, missing: COLORS.missing }) as [
+        {(Object.entries({ arrow: COLORS.arrow, ok: COLORS.ok, fix: COLORS.fix, missing: COLORS.missing, brand: COLORS.brand }) as [
           string,
           string,
         ][]).map(([k, c]) => (
@@ -222,7 +227,7 @@ export function ArrowDiagram({
             <line
               {...line(p)}
               stroke={st.color}
-              strokeWidth={2.5}
+              strokeWidth={st.marker === 'brand' ? 4 : 2.5}
               strokeDasharray={st.dash}
               markerEnd={`url(#${uid}-${st.marker})`}
               className={animate ? 'arrow-draw' : undefined}

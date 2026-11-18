@@ -37,12 +37,34 @@ body {
   }
 }
 
+/* Pasangan / tanda ✓ ✕ muncul dengan "pop" kecil */
+.pop-in {
+  animation: pop-in 0.3s ease-out;
+}
+@keyframes pop-in {
+  from {
+    opacity: 0;
+    transform: scale(0.6);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+/* Noktah Kartesius muncul setelah garis bantu selesai digambar */
+.point-pop {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: pop-in 0.3s ease-out 0.5s both;
+}
+
 /* Hormati pengaturan "kurangi gerakan" di perangkat siswa */
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
   *::after {
     animation-duration: 0.01ms !important;
+    animation-delay: 0ms !important;
     transition-duration: 0.01ms !important;
   }
 }

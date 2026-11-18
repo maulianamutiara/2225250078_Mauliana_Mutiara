@@ -466,7 +466,7 @@ function Feedback({ tone, children }: { tone: 'ok' | 'fix'; children: ReactNode 
       role="status"
       className={`flex gap-3 rounded-xl border-2 p-3 ${ok ? 'border-ok bg-green-50' : 'border-fix bg-red-50'}`}
     >
-      <span className={`text-xl font-bold ${ok ? 'text-ok' : 'text-fix'}`} aria-hidden>
+      <span className={`pop-in inline-block text-xl font-bold ${ok ? 'text-ok' : 'text-fix'}`} aria-hidden>
         {ok ? '✓' : '✕'}
       </span>
       <div className="space-y-1">

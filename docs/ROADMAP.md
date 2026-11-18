@@ -32,7 +32,9 @@ Perkiraan total: **±10 minggu** kerja paruh waktu. Sesuaikan dengan jadwal skri
 
 ## Fase 4 — Konten & Alur Belajar (minggu 6–7) — sebagian besar selesai 11 Nov 2026
 - [x] Materi langkah demi langkah (F4) dengan animasi panah + tombol "Ulangi animasi" (F6)
-- [ ] Kontrol jeda/putar animasi (F6 lengkap)
+- [x] Kontrol animasi ▶ Putar · ⏸ Jeda · ⏭ Langkah · ↺ Ulang (F6 lengkap)
+- [x] Animasi perubahan bentuk: panah → pasangan (Topik 3), pasangan → noktah (Topik 4), panah → noktah (Topik 5)
+- [x] Tanda ✓/✕ muncul dengan "pop" saat jawaban dicek
 - [x] Konten Topik 0–6 di `src/content/topic0.ts` … `topic6.ts`
 - [x] Bank soal: 34 soal (L1–L4) dengan hint & pembahasan; kebenaran soal bilangan dicek otomatis
 - [ ] Soal pretest/posttest (10 soal paralel)

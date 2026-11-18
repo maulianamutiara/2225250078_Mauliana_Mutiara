@@ -15,7 +15,7 @@ export const topic5: TopicContent = {
     },
     {
       text: ['Ketiga: diagram Kartesius.', 'Satu panah = satu pasangan = satu noktah.'],
-      visual: { kind: 'cartesian', relation: TWICE },
+      visual: { kind: 'convert', relation: TWICE, from: 'arrow', to: 'cartesian', animate: true },
     },
     {
       text: ['Alat bantu tambahan: tabel.', 'Tabel membantu memeriksa pasangan dengan rapi.'],

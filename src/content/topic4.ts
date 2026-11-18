@@ -15,11 +15,11 @@ export const topic4: TopicContent = {
     },
     {
       text: ['Pasangan (2, 1) digambar sebagai noktah.', 'Letaknya tepat di atas 2 dan sejajar dengan 1.'],
-      visual: { kind: 'cartesian', relation: TWICE, reveal: 1 },
+      visual: { kind: 'cartesian', relation: TWICE, reveal: 1, animate: true },
     },
     {
       text: ['Gambar semua pasangan dengan cara yang sama.', 'Relasi "dua kali dari" punya tiga noktah.'],
-      visual: { kind: 'cartesian', relation: TWICE },
+      visual: { kind: 'convert', relation: TWICE, from: 'pairs', to: 'cartesian', animate: true },
     },
   ],
   problems: [

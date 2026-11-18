@@ -14,11 +14,11 @@ export const topic3: TopicContent = {
         'Setiap panah bisa ditulis sebagai pasangan berurutan (a, b).',
         'a dari himpunan A, b dari himpunan B.',
       ],
-      visual: { kind: 'arrow', relation: TWICE },
+      visual: { kind: 'convert', relation: TWICE, from: 'arrow', to: 'pairs', animate: true },
     },
     {
       text: ['Panah 2 → 1 ditulis (2, 1).', 'Urutannya tidak boleh ditukar.', '(1, 2) artinya panah dari 1 ke 2.'],
-      visual: { kind: 'pairs', relation: TWICE, reveal: 1 },
+      visual: { kind: 'pairs', relation: TWICE, reveal: 1, animate: true },
     },
     {
       text: [

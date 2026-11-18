@@ -95,6 +95,8 @@
 - Durasi ≤ 30 detik; kontrol ▶ ⏸ ↺ dan "langkah" (maju per langkah).
 - Gerakan bermakna saja: panah tumbuh dari A ke B, pasangan "terbang" dari panah ke notasi, noktah jatuh ke grid.
 - Hormati pengaturan `prefers-reduced-motion`.
+- **Sudah dibuat:** `src/content/animation.ts` (rencana & batas 30 detik, diuji), `useStepPlayer` (▶ ⏸ ⏭ ↺),
+  visual `convert` (panah → pasangan, pasangan → noktah dengan garis bantu dari kedua sumbu), keterangan singkat di dekat gambar.
 
 ## 7. Aksesibilitas & Keterbacaan
 - Kontras minimal 4.5:1; tidak mengandalkan warna saja.

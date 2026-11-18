@@ -9,10 +9,14 @@ interface PairsViewProps {
   onRemove?: (p: Pair) => void;
   locked?: readonly Pair[];
   marks?: PairMarks;
+  /** Pasangan yang sedang dibahas animasi. */
+  highlight?: Pair;
+  /** Pasangan terbaru muncul dengan animasi "pop". */
+  animateLast?: boolean;
 }
 
 /** Notasi himpunan pasangan berurutan: R = {(a, b), ...}. a biru (dari A), b oranye (dari B). */
-export function PairsView({ pairs, name = 'R', onRemove, locked = [], marks }: PairsViewProps) {
+export function PairsView({ pairs, name = 'R', onRemove, locked = [], marks, highlight, animateLast }: PairsViewProps) {
   const wrong = marks?.wrong ?? [];
   return (
     <div className="flex flex-wrap items-center gap-x-1 gap-y-2 text-lg" aria-label="Himpunan pasangan berurutan">
@@ -30,9 +34,11 @@ export function PairsView({ pairs, name = 'R', onRemove, locked = [], marks }: P
             {ok && <span className="ml-1 text-ok">✓</span>}
           </>
         );
+        const lit = !!highlight && hasPair([highlight], p);
         const cls = [
           'inline-flex items-center rounded-lg border-2 px-2 py-1 whitespace-nowrap',
-          isWrong ? 'border-fix bg-red-50' : ok ? 'border-ok bg-green-50' : 'border-line bg-surface',
+          isWrong ? 'border-fix bg-red-50' : ok ? 'border-ok bg-green-50' : lit ? 'border-brand bg-brand-soft' : 'border-line bg-surface',
+          animateLast && i === pairs.length - 1 ? 'pop-in' : '',
         ].join(' ');
         return (
           <span key={p.join('|')} className="inline-flex items-center">

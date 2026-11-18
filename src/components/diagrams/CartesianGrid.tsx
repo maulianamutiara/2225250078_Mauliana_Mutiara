@@ -8,6 +8,8 @@ interface CartesianGridProps {
   interactive?: boolean;
   onToggle?: (p: Pair) => void;
   marks?: PairMarks;
+  /** Noktah yang sedang dibahas animasi: diberi garis bantu dari kedua sumbu dan muncul dengan "pop". */
+  highlight?: Pair;
 }
 
 const W = 360;
@@ -15,7 +17,7 @@ const ROW = 44;
 const TOP = 26;
 
 /** Diagram Kartesius: anggota A di sumbu mendatar, anggota B di sumbu tegak. Ketuk titik temu untuk menaruh noktah. */
-export function CartesianGrid({ relation, points, interactive = false, onToggle, marks }: CartesianGridProps) {
+export function CartesianGrid({ relation, points, interactive = false, onToggle, marks, highlight }: CartesianGridProps) {
   const { setA, setB } = relation;
   const longestB = Math.max(...setB.map((b) => b.length), 1);
   const left = Math.min(110, Math.max(34, longestB * 7.5 + 16));
@@ -86,6 +88,30 @@ export function CartesianGrid({ relation, points, interactive = false, onToggle,
         </text>
       ))}
 
+      {/* Garis bantu animasi: dari anggota A naik, dari anggota B mendatar, bertemu di noktah */}
+      {highlight && setA.includes(highlight[0]) && setB.includes(highlight[1]) && (
+        <g key={`hl-${highlight.join('|')}`}>
+          <line
+            className="arrow-draw"
+            x1={xOf(setA.indexOf(highlight[0]))}
+            y1={axisY}
+            x2={xOf(setA.indexOf(highlight[0]))}
+            y2={yOf(setB.indexOf(highlight[1]))}
+            stroke="#2563EB"
+            strokeWidth={2.5}
+          />
+          <line
+            className="arrow-draw"
+            x1={left}
+            y1={yOf(setB.indexOf(highlight[1]))}
+            x2={xOf(setA.indexOf(highlight[0]))}
+            y2={yOf(setB.indexOf(highlight[1]))}
+            stroke="#EA580C"
+            strokeWidth={2.5}
+          />
+        </g>
+      )}
+
       {/* Titik temu */}
       {setA.map((a, i) =>
         setB.map((b, j) => {
@@ -105,7 +131,15 @@ export function CartesianGrid({ relation, points, interactive = false, onToggle,
               {isMissing && (
                 <circle cx={xOf(i)} cy={yOf(j)} r={7} fill="none" stroke="#A8A29E" strokeWidth={2} strokeDasharray="3 3" />
               )}
-              {on && <circle cx={xOf(i)} cy={yOf(j)} r={7} fill={fill} />}
+              {on && (
+                <circle
+                  cx={xOf(i)}
+                  cy={yOf(j)}
+                  r={7}
+                  fill={highlight && hasPair([highlight], p) ? '#0F766E' : fill}
+                  className={highlight && hasPair([highlight], p) ? 'point-pop' : undefined}
+                />
+              )}
               {isWrong && (
                 <text x={xOf(i) + 9} y={yOf(j) - 7} fontSize={12} fontWeight={700} fill="#B91C1C">
                   ✕

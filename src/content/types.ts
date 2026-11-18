@@ -7,8 +7,10 @@ import type { CognitiveFunctionId, ToolId } from './rmt';
 export type Visual =
   | { kind: 'set'; name: string; members: string[]; color: 'A' | 'B' }
   | { kind: 'arrow'; relation: Relation; reveal?: number; animate?: boolean }
-  | { kind: 'pairs'; relation: Relation; reveal?: number }
-  | { kind: 'cartesian'; relation: Relation; reveal?: number }
+  | { kind: 'pairs'; relation: Relation; reveal?: number; animate?: boolean }
+  | { kind: 'cartesian'; relation: Relation; reveal?: number; animate?: boolean }
+  /** Animasi perubahan bentuk: satu panah = satu pasangan = satu noktah (langkah demi langkah). */
+  | { kind: 'convert'; relation: Relation; from: 'arrow' | 'pairs'; to: 'pairs' | 'cartesian'; animate?: boolean }
   | { kind: 'table'; relation: Relation; reveal?: number }
   /** Kartu "Alat Berpikir" RMT: struktur & fungsi sebuah alat psikologis. */
   | { kind: 'tool'; tool: ToolId };
