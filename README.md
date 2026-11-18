@@ -64,6 +64,12 @@ variabel lingkungan backend (`.env`), dibaca oleh `api/chat.ts` → `server/chat
    (opsional: `AI_ACCESS_CODE` sebagai kode akses kelas) → **Redeploy**.
 3. Buka alamat `https://<nama-proyek>.vercel.app`. Uji di **⚙️ Pengaturan → Uji koneksi**.
 
+### Pilihan gratis (OpenRouter) — yang dipakai saat ini
+Isi tiga variabel di Vercel: `DEEPSEEK_API_KEY` = kunci OpenRouter (`sk-or-v1-...`),
+`DEEPSEEK_BASE_URL` = `https://openrouter.ai/api/v1`, dan `DEEPSEEK_MODEL` = daftar model gratis
+dipisah koma (lihat `.env.example`). Batas sekitar 50 pertanyaan per hari. Untuk satu kelas, pakai
+DeepSeek resmi berbayar: hapus `DEEPSEEK_BASE_URL` dan `DEEPSEEK_MODEL`, isi kunci DeepSeek.
+
 Versi GitHub Pages tetap jalan untuk materi dan soal, tetapi tanpa Mediator (Pages tidak punya backend).
 
 ## Urutan membaca yang disarankan
