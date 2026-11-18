@@ -127,3 +127,14 @@ describe('OpenRouter', () => {
     expect(sent.max_tokens).toBeLessThan(1000);
   });
 });
+
+describe('daftar model cadangan', () => {
+  it('OpenRouter: beberapa model dipisah koma dikirim sebagai cadangan', async () => {
+    const f = okUpstream();
+    const e = { ...env, DEEPSEEK_BASE_URL: 'https://openrouter.ai/api/v1', DEEPSEEK_MODEL: ' a/x:free , b/y:free ' };
+    await handleChat(post(body), e, f);
+    const sent = JSON.parse((f.mock.calls[0] as [string, RequestInit])[1].body as string);
+    expect(sent.model).toBe('a/x:free');
+    expect(sent.models).toEqual(['a/x:free', 'b/y:free']);
+  });
+});

@@ -90,6 +90,11 @@ export async function handleChat(req: Request, env: ProxyEnv, fetchImpl: typeof 
   if (typeof parsed === 'string') return json(400, { error: 'bad-request', detail: parsed }, headers);
 
   const base = (env.DEEPSEEK_BASE_URL?.trim() || 'https://api.deepseek.com').replace(/\/+$/, '');
+  const models = (env.DEEPSEEK_MODEL ?? '')
+    .split(',')
+    .map((m) => m.trim())
+    .filter(Boolean);
+  if (models.length === 0) models.push('deepseek-chat');
   let openRouter = false;
   try {
     openRouter = new URL(base).host.endsWith('openrouter.ai');
@@ -102,11 +107,14 @@ export async function handleChat(req: Request, env: ProxyEnv, fetchImpl: typeof 
       method: 'POST',
       headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${apiKey}` },
       body: JSON.stringify({
-        model: env.DEEPSEEK_MODEL?.trim() || 'deepseek-chat',
+        model: models[0],
+        // OpenRouter: DEEPSEEK_MODEL boleh berisi beberapa model dipisah koma → cadangan otomatis
+        // bila model pertama sibuk (429) atau gagal.
+        ...(openRouter && models.length > 1 ? { models } : {}),
         messages: buildServerMessages(parsed),
         // Model "berpikir" di OpenRouter memakai sebagian jatah token untuk berpikir → beri ruang lebih,
         // minta berpikir singkat, dan jangan kirim isi pikirannya (hanya jawaban akhir yang dipakai).
-        max_tokens: openRouter ? MAX_TOKENS[parsed.task] + 1500 : MAX_TOKENS[parsed.task],
+        max_tokens: openRouter ? MAX_TOKENS[parsed.task] + 3000 : MAX_TOKENS[parsed.task],
         ...(openRouter ? { reasoning: { effort: 'low', exclude: true } } : {}),
         temperature: 0.4,
         stream: false,
