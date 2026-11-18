@@ -13,7 +13,8 @@ mengelola beban intrinsik, dan mendorong beban germane. Berjalan di **web (PWA)*
 Materi dan latihan dibangun pada fase berikutnya — lihat `docs/ROADMAP.md`.
 
 ## Link
-- Aplikasi (bisa dibuka di Android & iPhone): https://maulianamutiara.github.io/2225250078_Mauliana_Mutiara/
+- **Aplikasi + Mediator AI (Vercel):** https://2225250078-mauliana-mutiara.vercel.app
+- Aplikasi tanpa Mediator AI (GitHub Pages): https://maulianamutiara.github.io/2225250078_Mauliana_Mutiara/
 - Kode di GitHub: https://github.com/maulianamutiara/2225250078_Mauliana_Mutiara
 
 ## Menjalankan Aplikasi
