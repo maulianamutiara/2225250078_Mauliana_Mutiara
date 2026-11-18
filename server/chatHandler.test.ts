@@ -107,3 +107,23 @@ describe('diagnosis alamat layanan AI', () => {
     expect(text).not.toContain(KEY);
   });
 });
+
+describe('OpenRouter', () => {
+  it('memberi ruang token untuk model "berpikir" dan meminta isi pikiran tidak dikirim', async () => {
+    const f = okUpstream();
+    await handleChat(post({ ...body, task: 'ping' }), { ...env, DEEPSEEK_BASE_URL: 'https://openrouter.ai/api/v1' }, f);
+    const [url, init] = f.mock.calls[0] as [string, RequestInit];
+    expect(url).toBe('https://openrouter.ai/api/v1/chat/completions');
+    const sent = JSON.parse(init.body as string);
+    expect(sent.max_tokens).toBeGreaterThan(1000);
+    expect(sent.reasoning).toEqual({ effort: 'low', exclude: true });
+  });
+
+  it('DeepSeek resmi tidak menerima parameter reasoning', async () => {
+    const f = okUpstream();
+    await handleChat(post(body), env, f);
+    const sent = JSON.parse((f.mock.calls[0] as [string, RequestInit])[1].body as string);
+    expect(sent.reasoning).toBeUndefined();
+    expect(sent.max_tokens).toBeLessThan(1000);
+  });
+});

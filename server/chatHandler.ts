@@ -90,6 +90,12 @@ export async function handleChat(req: Request, env: ProxyEnv, fetchImpl: typeof 
   if (typeof parsed === 'string') return json(400, { error: 'bad-request', detail: parsed }, headers);
 
   const base = (env.DEEPSEEK_BASE_URL?.trim() || 'https://api.deepseek.com').replace(/\/+$/, '');
+  let openRouter = false;
+  try {
+    openRouter = new URL(base).host.endsWith('openrouter.ai');
+  } catch {
+    /* alamat tidak sah → ditangani saat fetch */
+  }
   let upstream: Response;
   try {
     upstream = await fetchImpl(`${base}/chat/completions`, {
@@ -98,7 +104,10 @@ export async function handleChat(req: Request, env: ProxyEnv, fetchImpl: typeof 
       body: JSON.stringify({
         model: env.DEEPSEEK_MODEL?.trim() || 'deepseek-chat',
         messages: buildServerMessages(parsed),
-        max_tokens: MAX_TOKENS[parsed.task],
+        // Model "berpikir" di OpenRouter memakai sebagian jatah token untuk berpikir → beri ruang lebih,
+        // minta berpikir singkat, dan jangan kirim isi pikirannya (hanya jawaban akhir yang dipakai).
+        max_tokens: openRouter ? MAX_TOKENS[parsed.task] + 1500 : MAX_TOKENS[parsed.task],
+        ...(openRouter ? { reasoning: { effort: 'low', exclude: true } } : {}),
         temperature: 0.4,
         stream: false,
         ...(parsed.task === 'mediator' ? { response_format: { type: 'json_object' } } : {}),
@@ -128,9 +137,13 @@ export async function handleChat(req: Request, env: ProxyEnv, fetchImpl: typeof 
   }
 
   const data = (await upstream.json().catch(() => null)) as
-    | { choices?: { message?: { content?: unknown } }[] }
+    | { model?: string; choices?: { finish_reason?: string; message?: { content?: unknown } }[] }
     | null;
   const text = data?.choices?.[0]?.message?.content;
-  if (typeof text !== 'string' || !text.trim()) return json(502, { error: 'empty' }, headers);
+  if (typeof text !== 'string' || !text.trim()) {
+    const diag = { model: data?.model, finish: data?.choices?.[0]?.finish_reason };
+    console.error('[chat] balasan kosong', diag);
+    return json(502, { error: 'empty', ...diag }, headers);
+  }
   return json(200, { reply: text.trim() }, headers);
 }
