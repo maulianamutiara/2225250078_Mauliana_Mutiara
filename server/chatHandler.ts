@@ -105,7 +105,14 @@ export async function handleChat(req: Request, env: ProxyEnv, fetchImpl: typeof 
       }),
     });
   } catch {
-    return json(502, { error: 'upstream' }, headers);
+    // Gagal terhubung: tunjukkan apakah DEEPSEEK_BASE_URL berupa alamat yang sah (tanpa kunci).
+    let provider = 'alamat-tidak-sah';
+    try {
+      provider = new URL(base).host || provider;
+    } catch {
+      /* DEEPSEEK_BASE_URL bukan URL lengkap (harus diawali https://) */
+    }
+    return json(502, { error: 'upstream', provider, reason: 'connect' }, headers);
   }
 
   if (!upstream.ok) {

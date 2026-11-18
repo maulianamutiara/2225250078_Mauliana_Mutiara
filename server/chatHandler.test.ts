@@ -94,3 +94,16 @@ describe('backend /api/chat', () => {
     expect(last).toBe(429);
   });
 });
+
+describe('diagnosis alamat layanan AI', () => {
+  it('melaporkan DEEPSEEK_BASE_URL yang tidak sah tanpa membocorkan kunci', async () => {
+    const f = vi.fn(async () => {
+      throw new TypeError('Invalid URL');
+    }) as unknown as typeof fetch;
+    const res = await handleChat(post(body), { ...env, DEEPSEEK_BASE_URL: 'openrouter/free' }, f);
+    expect(res.status).toBe(502);
+    const text = await res.text();
+    expect(JSON.parse(text)).toEqual({ error: 'upstream', provider: 'alamat-tidak-sah', reason: 'connect' });
+    expect(text).not.toContain(KEY);
+  });
+});
