@@ -38,10 +38,13 @@ npx cap sync android # setelah build, untuk Android
    Sediakan alternatif "ketuk A lalu ketuk B" untuk membuat panah.
 5. **Mobile-first**: uji di lebar 360px. Target sentuh ≥ 44×44 px.
 6. Akses `localStorage` hanya lewat `src/lib/storage.ts` (dibungkus try/catch).
-7. Tanpa backend, tanpa data pribadi, tanpa SDK analitik pihak ketiga. Satu-satunya layanan luar
-   adalah **Mediator AI DeepSeek** (`src/ai/`), dengan aturan:
-   - Kunci API **tidak pernah** ditulis di kode, `.env` yang di-commit, atau GitHub. Kunci diisi guru di
-     layar ⚙️ Pengaturan dan disimpan lewat `src/store/aiSettings.ts`.
+7. Tanpa data pribadi, tanpa SDK analitik pihak ketiga. Satu-satunya layanan luar adalah
+   **Mediator AI DeepSeek**, lewat backend kecil `api/chat.ts` → `server/chatHandler.ts`, dengan aturan:
+   - Kunci API **hanya** di variabel lingkungan backend (`DEEPSEEK_API_KEY` di `.env` lokal atau
+     Vercel). **Tidak pernah** di kode frontend, `.env` yang di-commit, atau GitHub. Browser hanya
+     memanggil `/api/chat` (`src/ai/client.ts`); perangkat hanya menyimpan kode akses kelas (opsional).
+   - Prompt sistem & aturan pedagogis (beban kognitif + RMT) ada di `src/ai/pedagogy.ts` dan disusun
+     di server; browser tidak boleh mengirim pesan "system". Lihat `docs/COGNITIVE_LOAD.md`.
    - **Kunci jawaban tidak pernah dikirim ke AI** (`relation.pairs`, `answer`). AI hanya menerima soal,
      jawaban siswa, dan status dari `domain/grading.ts`. Ada tes yang menjaga aturan ini.
    - Tidak mengirim kode/nama siswa ke AI.

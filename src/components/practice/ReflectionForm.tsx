@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { buildReflectionMessages } from '../../ai/prompts';
+import { buildReflectionRequest } from '../../ai/prompts';
 import { cognitiveFunctions, type CognitiveFunctionId } from '../../content/rmt';
 import { FeedbackButton } from '../ai/FeedbackButton';
 import { Button } from '../ui/Button';
@@ -95,7 +95,7 @@ export function ReflectionForm({ topicTitle, summary, functionOptions, onSubmit,
         <FeedbackButton
           disabled={text.trim().length < 10}
           build={() =>
-            buildReflectionMessages({ topicTitle, summary, functionsUsed: used, effort, text: text.trim() })
+            buildReflectionRequest({ topicTitle, summary, functionsUsed: used, effort, text: text.trim() })
           }
         />
       </div>

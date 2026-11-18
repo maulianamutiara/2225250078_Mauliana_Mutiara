@@ -27,6 +27,8 @@ export interface Attempt {
   at: string; // waktu ISO
   /** Bukti logis yang ditulis siswa setelah menjawab benar (RMT). */
   evidence?: string;
+  /** Bantuan Asisten Belajar di soal ini: jenis kesulitan, tingkat petunjuk (1–4), jenis beban kognitif. */
+  aiHelp?: { difficulty: string; level: number; load?: string; at: string }[];
 }
 
 export interface Reflection {

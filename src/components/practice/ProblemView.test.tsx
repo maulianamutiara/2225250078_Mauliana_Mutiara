@@ -65,31 +65,42 @@ describe('ProblemView', () => {
     expect(onDone).toHaveBeenCalledWith(expect.objectContaining({ correct: false, tries: 3 }));
   });
 
-  it('Mediator: tanpa kunci menampilkan petunjuk ke Pengaturan', async () => {
-    useAiSettings.getState().clearKey();
+  it('Mediator: bila backend belum dipasangi kunci, muncul pesan yang jelas', async () => {
+    vi.stubGlobal('fetch', vi.fn(async () => new Response(JSON.stringify({ error: 'not-configured' }), { status: 503 })));
     const user = userEvent.setup();
     render(<ProblemView problem={byId('P2-3')} onDone={() => {}} />);
     await user.click(screen.getByRole('button', { name: /Tanya Mediator/ }));
-    expect(screen.getByText(/Mediator AI belum aktif/)).toBeInTheDocument();
+    await user.click(screen.getByRole('button', { name: 'Aku bingung mulai dari mana' }));
+    expect(await screen.findByText(/belum diaktifkan/)).toBeInTheDocument();
+    vi.unstubAllGlobals();
   });
 
-  it('Mediator: mengirim pertanyaan tanpa kunci jawaban dan menampilkan balasan', async () => {
-    useAiSettings.getState().save({ apiKey: 'sk-test' });
-    const fetchMock = vi.fn(async () =>
-      new Response(JSON.stringify({ choices: [{ message: { content: 'Coba **cek** anggota 4 dulu. Kamu sedang mencari secara sistematis.' } }] }), {
-        status: 200,
-      }),
-    );
+  it('Mediator: memilih jenis kesulitan → bimbingan bertahap tanpa kunci jawaban', async () => {
+    useAiSettings.getState().save('');
+    const reply = JSON.stringify({
+      pesan: 'Coba **cek** anggota 4 dulu.',
+      pertanyaan: 'Angka mana di B yang setengah dari 4?',
+      beban: 'intrinsik',
+      level: 1,
+    });
+    const fetchMock = vi.fn(async () => new Response(JSON.stringify({ reply }), { status: 200 }));
     vi.stubGlobal('fetch', fetchMock);
     const user = userEvent.setup();
     render(<ProblemView problem={byId('P2-3')} onDone={() => {}} />);
     await user.click(screen.getByRole('button', { name: /Tanya Mediator/ }));
     await user.click(screen.getByRole('button', { name: 'Aku bingung mulai dari mana' }));
     expect(await screen.findByText(/Coba cek anggota 4 dulu/)).toBeInTheDocument();
-    const body = JSON.parse((fetchMock.mock.calls[0] as unknown as [string, RequestInit])[1].body as string);
-    expect(JSON.stringify(body.messages)).not.toContain('(4, 2)');
+    expect(screen.getByText(/Angka mana di B/)).toBeInTheDocument();
+    expect(screen.getByText(/Mengelola beban intrinsik/)).toBeInTheDocument();
+    expect(screen.getByText(/Petunjuk 1\/4/)).toBeInTheDocument();
+
+    const [url, init] = fetchMock.mock.calls[0] as unknown as [string, RequestInit];
+    expect(url).toBe('/api/chat');
+    expect((init.headers as Record<string, string>).Authorization).toBeUndefined();
+    const body = JSON.parse(init.body as string);
+    expect(body).toMatchObject({ task: 'mediator', difficulty: 'start', hintLevel: 1 });
+    expect(JSON.stringify(body)).not.toContain('(4, 2)');
     vi.unstubAllGlobals();
-    useAiSettings.getState().clearKey();
   });
 
   it('isian angka (literasi): salah ditandai, lalu benar', async () => {

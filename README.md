@@ -43,10 +43,27 @@ toolbar) → pilih lebar 360px.
 | [docs/ROADMAP.md](docs/ROADMAP.md) | Tahapan pengerjaan (milestone & checklist) | Semua |
 | [docs/EVALUASI.md](docs/EVALUASI.md) | Rencana validasi ahli, uji kepraktisan, uji coba | Dosen, peneliti |
 | [docs/RMT.md](docs/RMT.md) | Ringkasan Rigorous Mathematical Thinking & pemetaannya ke fitur | Dosen, pengembang |
+| [docs/COGNITIVE_LOAD.md](docs/COGNITIVE_LOAD.md) | Wawancara → jenis beban → perilaku Asisten Belajar (AI) | Dosen, pengembang |
 
-## Mediator AI (DeepSeek)
-Buka aplikasi → **⚙️ Pengaturan** → tempel kunci API DeepSeek → **Uji koneksi**. Kunci hanya
-tersimpan di perangkat itu dan **tidak boleh** ditaruh di kode/GitHub (repo ini publik).
+## Mediator AI (DeepSeek) — Asisten Belajar
+Asisten Belajar membimbing proses berpikir siswa secara bertahap (beban kognitif + RMT), tanpa
+memberi jawaban akhir. Penjelasan lengkap: [docs/COGNITIVE_LOAD.md](docs/COGNITIVE_LOAD.md).
+
+**Keamanan kunci:** kunci DeepSeek **tidak** ada di kode frontend maupun GitHub. Kunci disimpan di
+variabel lingkungan backend (`.env`), dibaca oleh `api/chat.ts` → `server/chatHandler.ts`.
+
+### Menjalankan di laptop
+1. Salin `.env.example` menjadi `.env` (file `.env` otomatis diabaikan Git).
+2. Isi `DEEPSEEK_API_KEY=sk-...` di `.env`.
+3. `npm run dev` → Mediator langsung aktif di `http://localhost:5173`.
+
+### Online (Vercel, gratis)
+1. Masuk ke vercel.com dengan akun GitHub → **Add New → Project** → pilih repo ini → **Deploy**.
+2. Buka proyek → **Settings → Environment Variables** → tambahkan `DEEPSEEK_API_KEY`
+   (opsional: `AI_ACCESS_CODE` sebagai kode akses kelas) → **Redeploy**.
+3. Buka alamat `https://<nama-proyek>.vercel.app`. Uji di **⚙️ Pengaturan → Uji koneksi**.
+
+Versi GitHub Pages tetap jalan untuk materi dan soal, tetapi tanpa Mediator (Pages tidak punya backend).
 
 ## Urutan membaca yang disarankan
 1. `docs/ANALISIS_KEBUTUHAN.md` → 2. `docs/PRD.md` → 3. `docs/DESAIN_PEMBELAJARAN.md`

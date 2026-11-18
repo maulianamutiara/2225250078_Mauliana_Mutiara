@@ -1,37 +1,33 @@
 import { create } from 'zustand';
-import { DEFAULT_AI_SETTINGS, type AiSettings } from '../ai/client';
 import { loadJSON, saveJSON } from '../lib/storage';
 
-// Pengaturan Mediator AI — hanya tersimpan di perangkat ini (localStorage via storage.ts),
-// tidak pernah dikirim ke mana pun selain ke DeepSeek saat Mediator dipakai.
+// Pengaturan Mediator AI di perangkat: HANYA kode akses kelas (opsional).
+// Kunci DeepSeek TIDAK disimpan di perangkat — kunci ada di backend (.env / Vercel).
 const STORAGE_KEY = 'ai-settings';
 
-interface AiSettingsStore extends AiSettings {
-  save: (patch: Partial<AiSettings>) => void;
-  clearKey: () => void;
+interface StoredSettings {
+  accessCode?: string;
+  /** Versi lama aplikasi menyimpan kunci di perangkat — dihapus otomatis. */
+  apiKey?: string;
 }
 
-function pick(s: AiSettings): AiSettings {
-  return { apiKey: s.apiKey, model: s.model, baseUrl: s.baseUrl };
+const stored = loadJSON<StoredSettings>(STORAGE_KEY, {});
+if (stored.apiKey !== undefined) saveJSON(STORAGE_KEY, { accessCode: stored.accessCode ?? '' });
+
+interface AiSettingsStore {
+  accessCode: string;
+  save: (accessCode: string) => void;
 }
 
-export const useAiSettings = create<AiSettingsStore>()((set, get) => ({
-  ...DEFAULT_AI_SETTINGS,
-  ...loadJSON<Partial<AiSettings>>(STORAGE_KEY, {}),
-  save: (patch) => {
-    set({
-      ...patch,
-      ...(patch.apiKey !== undefined ? { apiKey: patch.apiKey.trim() } : {}),
-    });
-    saveJSON(STORAGE_KEY, pick(get()));
-  },
-  clearKey: () => {
-    set({ apiKey: '' });
-    saveJSON(STORAGE_KEY, pick(get()));
+export const useAiSettings = create<AiSettingsStore>()((set) => ({
+  accessCode: stored.accessCode ?? '',
+  save: (accessCode) => {
+    const clean = accessCode.trim();
+    set({ accessCode: clean });
+    saveJSON(STORAGE_KEY, { accessCode: clean });
   },
 }));
 
-/** Ambil pengaturan murni (tanpa fungsi) untuk dikirim ke klien AI. */
-export function currentAiSettings(): AiSettings {
-  return pick(useAiSettings.getState());
+export function currentAccessCode(): string {
+  return useAiSettings.getState().accessCode;
 }

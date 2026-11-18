@@ -1,7 +1,7 @@
-// Prompt Mediator AI berbasis RMT + Mediated Learning Experience (docs/RMT.md §3).
+// Penyusun KONTEKS untuk Mediator AI (di browser). Aturan pedagogis/prompt sistem ada di
+// pedagogy.ts dan disusun oleh BACKEND. File ini hanya merangkum soal & keadaan jawaban siswa.
 // PENTING: kunci jawaban (relation.pairs / answer / answers / fields[].answer) TIDAK pernah
-// dimasukkan ke prompt sebelum siswa benar, sehingga AI tidak mungkin membocorkannya.
-// AI hanya menerima soal, jawaban siswa, dan status hasil pemeriksaan aplikasi.
+// dikirim; AI hanya menerima soal, jawaban siswa, dan status hasil pemeriksaan aplikasi.
 import { misconceptionMessages } from '../content/feedback';
 import { cognitiveFunctions, functionsFor, type CognitiveFunctionId } from '../content/rmt';
 import type { ExplainStage, Problem } from '../content/types';
@@ -9,42 +9,7 @@ import { detectMisconceptions, gradePairs } from '../domain/grading';
 import { gradeMulti } from '../domain/literacy';
 import { formatPairs } from '../domain/relation';
 import type { Pair } from '../domain/types';
-import type { ChatMessage } from './client';
-
-const COMMON_RULES = [
-  'Kamu adalah "Mediator", pendamping belajar matematika siswa SMP kelas VIII di aplikasi RelaSI Pintar (materi Relasi).',
-  'Pendekatanmu: Rigorous Mathematical Thinking (Kinard & Kozulin) dan Mediated Learning Experience (Feuerstein).',
-  'Selalu pakai Bahasa Indonesia sederhana, ramah, maksimal 3 kalimat pendek, tanpa format markdown.',
-  'Pasangan berurutan (a, b): a selalu dari himpunan A, b dari himpunan B. Panah selalu dari A ke B.',
-  'Jika pertanyaan di luar materi relasi, arahkan kembali ke soal dengan sopan.',
-];
-
-export const MEDIATOR_SYSTEM = [
-  ...COMMON_RULES,
-  'Aturan mediasi:',
-  '1. JANGAN pernah memberi jawaban akhir, kunci, angka hasil, atau menyebutkan pasangan yang benar.',
-  '2. Ajukan tepat satu pertanyaan penuntun agar siswa berpikir sendiri.',
-  '3. Sebut satu fungsi kognitif yang sedang dipakai, misalnya "mencari secara sistematis" atau "memberi bukti logis".',
-  '4. Jika ada bagian yang sudah benar, sebutkan dulu agar siswa merasa mampu.',
-  '5. Kaitkan dengan alat berpikir: diagram panah, pasangan berurutan, tabel, atau diagram Kartesius.',
-  '6. Jika status jawaban BENAR, minta siswa menjelaskan bukti logisnya.',
-].join('\n');
-
-export const EVIDENCE_SYSTEM = [
-  ...COMMON_RULES,
-  'Tugasmu: menanggapi penjelasan atau "bukti logis" yang ditulis siswa.',
-  '1. Sebutkan bagian yang sudah tepat (mediasi rasa mampu).',
-  '2. Beri satu saran agar penjelasan lebih tepat atau lengkap, misalnya menyebut aturan, angka, atau perbandingan.',
-  '3. Jangan memberi soal baru dan jangan menilai dengan angka.',
-].join('\n');
-
-export const REFLECTION_SYSTEM = [
-  ...COMMON_RULES,
-  'Tugasmu: menanggapi jurnal refleksi siswa setelah satu topik.',
-  '1. Hargai usaha siswa dan sebut satu hal yang sudah ia pahami.',
-  '2. Jika ada salah konsep, luruskan dengan lembut dalam satu kalimat.',
-  '3. Hubungkan dengan satu fungsi kognitif yang ia pakai, lalu ajukan satu pertanyaan untuk dipikirkan.',
-].join('\n');
+import { LIMITS, type AiHistoryItem, type AiRequest, type Difficulty, type HintLevel } from './pedagogy';
 
 const answerForm: Record<'arrow' | 'pairs' | 'cartesian', string> = {
   arrow: 'diagram panah (menarik panah dari A ke B)',
@@ -64,6 +29,8 @@ export interface AttemptState {
   choice?: number | null;
   values?: readonly (number | null)[];
   selected?: readonly number[];
+  tries?: number;
+  hintsUsed?: number;
 }
 
 /** Deskripsi soal untuk AI — tanpa kunci jawaban. */
@@ -88,6 +55,14 @@ export function describeProblem(problem: Problem): string {
 
 /** Status jawaban siswa saat ini menurut pemeriksa aplikasi — tanpa menyebut kunci. */
 export function describeAttempt(problem: Problem, state: AttemptState): string {
+  const effort =
+    state.tries !== undefined
+      ? `\nUsaha siswa: ${state.tries} kali cek jawaban, ${state.hintsUsed ?? 0} hint dibuka.`
+      : '';
+  return describeAnswer(problem, state) + effort;
+}
+
+function describeAnswer(problem: Problem, state: AttemptState): string {
   if (problem.type === 'mcq') {
     const choice = state.choice ?? null;
     if (choice === null) return 'Siswa belum memilih jawaban.';
@@ -131,57 +106,57 @@ export function describeAttempt(problem: Problem, state: AttemptState): string {
   return lines.join('\n');
 }
 
-/** Pesan untuk "🤖 Tanya Mediator" di dalam soal. `context` = bacaan soal literasi (opsional). */
-export function buildMediatorMessages(
-  problem: Problem,
-  state: AttemptState,
-  history: readonly ChatMessage[],
-  question: string,
-  context?: string,
-): ChatMessage[] {
-  const parts = ['KONTEKS (untukmu saja):'];
-  if (context) parts.push(`Bacaan soal literasi:\n${context}`);
-  parts.push(describeProblem(problem), describeAttempt(problem, state));
-  return [
-    { role: 'system', content: `${MEDIATOR_SYSTEM}\n\n${parts.join('\n')}` },
-    ...history.slice(-8),
-    { role: 'user', content: question },
-  ];
+function limit(text: string): string {
+  return text.slice(0, LIMITS.context);
 }
 
-/** Pesan untuk menanggapi bukti logis siswa (jawaban sudah benar, pembahasan boleh dipakai). */
-export function buildEvidenceMessages(
+/** Permintaan "🤖 Tanya Mediator" di dalam soal. `context` = bacaan & tahap soal literasi (opsional). */
+export function buildMediatorRequest(
+  problem: Problem,
+  state: AttemptState,
+  history: AiHistoryItem[],
+  question: string,
+  opts: { context?: string; difficulty: Difficulty; hintLevel: HintLevel },
+): AiRequest {
+  const parts: string[] = [];
+  if (opts.context) parts.push(opts.context);
+  parts.push(describeProblem(problem), describeAttempt(problem, state));
+  return {
+    task: 'mediator',
+    context: limit(parts.join('\n')),
+    question,
+    history,
+    difficulty: opts.difficulty,
+    hintLevel: opts.hintLevel,
+  };
+}
+
+/** Permintaan tanggapan bukti logis (jawaban sudah benar, pembahasan boleh dipakai sebagai acuan). */
+export function buildEvidenceRequest(
   problem: Problem,
   answerText: string,
   evidence: string,
   context?: string,
-): ChatMessage[] {
-  const lines = ['KONTEKS (untukmu saja):'];
-  if (context) lines.push(`Bacaan soal literasi:\n${context}`);
-  lines.push(
+): AiRequest {
+  const parts: string[] = [];
+  if (context) parts.push(context);
+  parts.push(
     describeProblem(problem),
     `Jawaban siswa (sudah BENAR): ${answerText}`,
     `Pembahasan resmi sebagai acuan: ${problem.explanation.join(' ')}`,
   );
-  return [
-    { role: 'system', content: `${EVIDENCE_SYSTEM}\n\n${lines.join('\n')}` },
-    { role: 'user', content: `Bukti logisku: ${evidence}` },
-  ];
+  return { task: 'evidence', context: limit(parts.join('\n')), question: `Bukti logisku: ${evidence}`, history: [] };
 }
 
-/** Pesan untuk menanggapi tahap "jelaskan alasanmu" pada soal literasi. */
-export function buildExplainMessages(stage: ExplainStage, context: string, text: string): ChatMessage[] {
-  const lines = [
-    'KONTEKS (untukmu saja):',
-    `Bacaan soal literasi:\n${context}`,
+/** Permintaan tanggapan tahap "jelaskan alasanmu" pada soal literasi. */
+export function buildExplainRequest(stage: ExplainStage, context: string, text: string): AiRequest {
+  const parts = [
+    context,
     `Perintah: ${stage.prompt}`,
     `Contoh jawaban acuan: ${stage.model}`,
     `Kriteria: ${stage.checklist.join(' ')}`,
   ];
-  return [
-    { role: 'system', content: `${EVIDENCE_SYSTEM}\n\n${lines.join('\n')}` },
-    { role: 'user', content: `Penjelasanku: ${text}` },
-  ];
+  return { task: 'explain', context: limit(parts.join('\n')), question: `Penjelasanku: ${text}`, history: [] };
 }
 
 export interface ReflectionInput {
@@ -192,10 +167,9 @@ export interface ReflectionInput {
   text: string;
 }
 
-/** Pesan untuk menanggapi jurnal refleksi RMT. */
-export function buildReflectionMessages(input: ReflectionInput): ChatMessage[] {
+/** Permintaan tanggapan jurnal refleksi RMT. */
+export function buildReflectionRequest(input: ReflectionInput): AiRequest {
   const context = [
-    'KONTEKS (untukmu saja):',
     `Topik: ${input.topicTitle}`,
     `Inti materi: ${input.summary.join(' ')}`,
     `Fungsi kognitif yang menurut siswa ia pakai: ${
@@ -203,9 +177,5 @@ export function buildReflectionMessages(input: ReflectionInput): ChatMessage[] {
     }`,
     `Usaha berpikir (1–9): ${input.effort ?? '(belum dipilih)'}`,
   ].join('\n');
-  return [
-    { role: 'system', content: `${REFLECTION_SYSTEM}\n\n${context}` },
-    { role: 'user', content: `Jurnal refleksiku: ${input.text}` },
-  ];
+  return { task: 'reflection', context: limit(context), question: `Jurnal refleksiku: ${input.text}`, history: [] };
 }
-

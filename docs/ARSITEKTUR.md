@@ -119,6 +119,16 @@ export interface Progress {
 
 Minimum Android: API 26 (Android 8.0). Orientasi utama potret.
 
+## 5b. Backend Mediator AI
+```
+Browser (src/ai/client.ts) ──POST /api/chat──▶ api/chat.ts (Vercel) ──▶ server/chatHandler.ts ──▶ DeepSeek
+        { task, context, question, history, difficulty, hintLevel }      kunci dari process.env
+```
+- Variabel lingkungan: `DEEPSEEK_API_KEY` (wajib), `DEEPSEEK_MODEL`, `DEEPSEEK_BASE_URL`,
+  `AI_ACCESS_CODE` (kode kelas, opsional), `ALLOWED_ORIGINS` (mis. alamat GitHub Pages). Contoh: `.env.example`.
+- Saat `npm run dev`, Vite melayani `/api/chat` dengan handler yang sama dan membaca `.env` lokal.
+- Server: validasi isi, batas 40 permintaan/10 menit per perangkat, prompt sistem dari `src/ai/pedagogy.ts`.
+
 ## 6. Privasi & Data Penelitian
-- Tidak ada server; tidak ada data pribadi wajib. Siswa memakai **kode** (mis. S01).
+- Satu-satunya server adalah perantara Mediator AI (tidak menyimpan apa pun); tidak ada data pribadi wajib. Siswa memakai **kode** (mis. S01).
 - Ekspor data (F15) menghasilkan file JSON/CSV yang dibagikan manual oleh guru/peneliti.

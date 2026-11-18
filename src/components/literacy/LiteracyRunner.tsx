@@ -30,8 +30,15 @@ export function LiteracyRunner({ tasks, onRecord, onComplete }: LiteracyRunnerPr
 
   const task = tasks[ti];
   const stage = task.stages[si];
-  const context = [...task.story, `Pertanyaan: ${task.question}`].join('\n');
   const maxScore = task.stages.reduce((s, st) => s + st.score, 0);
+  // Konteks untuk Asisten Belajar: bacaan + indikator literasi + posisi tahap (bimbingan bertahap).
+  const context = [
+    `Soal Literasi Matematika: ${task.title}`,
+    `Indikator: ${task.indicator} — ${task.indicatorDescription}`,
+    ...task.story,
+    `Pertanyaan: ${task.question}`,
+    `Siswa sedang di Tahap ${stage.tahap} (${si + 1} dari ${task.stages.length}), skor maks tahap ini ${stage.score}. Bimbing hanya tahap ini.`,
+  ].join('\n');
 
   const finishStage = (score: number) => {
     const next = [...results, { taskId: task.id, stageId: stage.item.id, tahap: stage.tahap, score, max: stage.score }];

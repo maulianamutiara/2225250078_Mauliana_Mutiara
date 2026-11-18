@@ -1,5 +1,5 @@
 import { useRef, useState } from 'react';
-import { buildExplainMessages } from '../../ai/prompts';
+import { buildExplainRequest } from '../../ai/prompts';
 import type { ExplainStage } from '../../content/types';
 import { FeedbackButton } from '../ai/FeedbackButton';
 import { FunctionChips } from '../rmt/FunctionChips';
@@ -79,7 +79,7 @@ export function ExplainStageView({ stage, context, onDone }: ExplainStageViewPro
             ))}
           </div>
 
-          <FeedbackButton build={() => buildExplainMessages(stage, context, text.trim())} />
+          <FeedbackButton build={() => buildExplainRequest(stage, context, text.trim())} />
 
           <Button
             block

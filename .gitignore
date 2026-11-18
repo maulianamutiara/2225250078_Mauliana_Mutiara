@@ -6,3 +6,10 @@ coverage
 .vscode/*
 !.vscode/extensions.json
 android/app/build
+
+# Rahasia — jangan pernah di-commit
+.env
+.env.*
+!.env.example
+.vercel
+*.tsbuildinfo

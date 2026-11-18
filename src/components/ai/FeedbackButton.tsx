@@ -1,28 +1,26 @@
 import { useState } from 'react';
-import { AiError, chat, cleanReply, isAiReady, type ChatMessage } from '../../ai/client';
-import { currentAiSettings, useAiSettings } from '../../store/aiSettings';
+import { AiError, askAi } from '../../ai/client';
+import { cleanReply, type AiRequest } from '../../ai/pedagogy';
+import { currentAccessCode } from '../../store/aiSettings';
 import { Button } from '../ui/Button';
 
 interface FeedbackButtonProps {
-  build: () => ChatMessage[];
+  build: () => AiRequest;
   disabled?: boolean;
   label?: string;
 }
 
-/** Tombol "minta tanggapan Mediator" untuk bukti logis atau refleksi. Tidak tampil jika AI belum aktif. */
+/** Tombol "minta tanggapan Mediator" untuk bukti logis, penjelasan, atau refleksi. */
 export function FeedbackButton({ build, disabled, label = '🤖 Minta tanggapan Mediator' }: FeedbackButtonProps) {
-  const apiKey = useAiSettings((s) => s.apiKey);
   const [reply, setReply] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
-
-  if (!isAiReady({ apiKey })) return null;
 
   const run = async () => {
     setLoading(true);
     setError(null);
     try {
-      setReply(cleanReply(await chat(currentAiSettings(), build())));
+      setReply(cleanReply(await askAi(build(), { accessCode: currentAccessCode() })));
     } catch (e) {
       setError(e instanceof AiError ? e.message : 'Terjadi kesalahan. Coba lagi.');
     } finally {

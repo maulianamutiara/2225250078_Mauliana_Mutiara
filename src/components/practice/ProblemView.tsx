@@ -1,5 +1,5 @@
 import { useRef, useState, type ReactNode } from 'react';
-import { buildEvidenceMessages, buildMediatorMessages } from '../../ai/prompts';
+import { buildEvidenceRequest, buildMediatorRequest } from '../../ai/prompts';
 import { misconceptionMessages, praise } from '../../content/feedback';
 import { functionsFor } from '../../content/rmt';
 import { isRelationProblem, type Problem, type RelationProblem } from '../../content/types';
@@ -8,7 +8,7 @@ import { gradeMulti, gradeNumbers } from '../../domain/literacy';
 import { formatPairs, hasPair, samePair, sortPairs } from '../../domain/relation';
 import type { MisconceptionCode, Pair, Relation } from '../../domain/types';
 import { FeedbackButton } from '../ai/FeedbackButton';
-import { MediatorChat } from '../ai/MediatorChat';
+import { MediatorChat, type AiTurn } from '../ai/MediatorChat';
 import { ArrowDiagram, type PairMarks } from '../diagrams/ArrowDiagram';
 import { CartesianGrid } from '../diagrams/CartesianGrid';
 import { PairBuilder } from '../diagrams/PairBuilder';
@@ -26,13 +26,9 @@ export interface ProblemOutcome {
   evidence?: string;
   /** Pasangan terakhir siswa (soal relasi) — untuk skor sebagian di soal literasi. */
   answer?: Pair[];
+  /** Catatan bantuan Asisten Belajar (jenis kesulitan, tingkat petunjuk, jenis beban) — data penelitian. */
+  aiHelp?: AiTurn[];
 }
-
-const mediatorSuggestions = [
-  'Aku bingung mulai dari mana',
-  'Apakah jawabanku sudah benar?',
-  'Apa maksud aturannya?',
-];
 
 interface ProblemViewProps {
   problem: Problem;
@@ -72,6 +68,7 @@ export function ProblemView({ problem, onDone, context }: ProblemViewProps) {
   const [showExplanation, setShowExplanation] = useState(false);
   const [mediatorOpen, setMediatorOpen] = useState(false);
   const [evidence, setEvidence] = useState('');
+  const [aiLog, setAiLog] = useState<AiTurn[]>([]);
   const started = useRef(Date.now());
 
   const finished = status !== 'answering';
@@ -148,6 +145,7 @@ export function ProblemView({ problem, onDone, context }: ProblemViewProps) {
       durationMs: Date.now() - started.current,
       evidence: evidence.trim() || undefined,
       answer: isRel ? pairs : undefined,
+      aiHelp: aiLog.length ? aiLog : undefined,
     });
 
   let canCheck: boolean;
@@ -366,7 +364,7 @@ export function ProblemView({ problem, onDone, context }: ProblemViewProps) {
           />
           <FeedbackButton
             disabled={evidence.trim().length < 5}
-            build={() => buildEvidenceMessages(problem, answerText, evidence.trim(), context)}
+            build={() => buildEvidenceRequest(problem, answerText, evidence.trim(), context)}
           />
         </div>
       )}
@@ -374,14 +372,15 @@ export function ProblemView({ problem, onDone, context }: ProblemViewProps) {
       {/* Mediator AI */}
       {mediatorOpen && !finished && (
         <MediatorChat
-          suggestions={mediatorSuggestions}
-          build={(history, question) =>
-            buildMediatorMessages(
+          effort={{ tries, hintsUsed: hintsShown }}
+          onTurn={(turn) => setAiLog((log) => [...log, turn])}
+          build={(history, question, difficulty, hintLevel) =>
+            buildMediatorRequest(
               problem,
-              { pairs, choice, values: parsedValues, selected },
+              { pairs, choice, values: parsedValues, selected, tries, hintsUsed: hintsShown },
               history,
               question,
-              context,
+              { context, difficulty, hintLevel },
             )
           }
         />

@@ -68,4 +68,7 @@ Sepanjang proses: **rigor** (ketelitian, kejelasan definisi, bukti logis, kedala
 3. Menyebut fungsi kognitif yang sedang dipakai.
 4. Menunjukkan bagian yang sudah benar sebelum memberi saran (rasa mampu).
 5. Mengaitkan dengan alat berpikir (diagram panah, pasangan, tabel, Kartesius).
+6. Bantuan bertahap 1–4 (Orientasi → Strategi & alat → Langkah terarah → Refleksi & pembuktian),
+   sesuai jenis kesulitan yang dipilih siswa. Rincian: `docs/COGNITIVE_LOAD.md`.
+7. Prompt sistem disusun di backend (`src/ai/pedagogy.ts` dipakai `server/chatHandler.ts`).
 6. Mengarahkan kembali jika pertanyaan di luar materi.

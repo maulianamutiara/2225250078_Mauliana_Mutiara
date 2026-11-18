@@ -53,6 +53,15 @@ Perkiraan total: **±10 minggu** kerja paruh waktu. Sesuaikan dengan jadwal skri
 - [x] Skor sebagian per anggota (perMember) untuk tahap diagram panah
 - [ ] Tinjau ulang kalimat tahap-tahap dengan dosen
 
+## Fase 4d — Asisten Belajar pedagogis & backend aman ✅ selesai 18 Nov 2026
+- [x] Backend `api/chat.ts` (Vercel) — kunci DeepSeek dari `.env`, tidak di frontend/GitHub
+- [x] Prompt sistem disusun di server; validasi isi, batas permintaan, kode akses kelas opsional
+- [x] Pilihan jenis kesulitan → jenis beban (ekstrinsik/intrinsik/germane) → bimbingan
+- [x] Tangga petunjuk 1–4 mengikuti fase RMT, naik bertahap sesuai usaha siswa
+- [x] Catatan bantuan AI per soal (`aiHelp`) untuk data penelitian; `docs/COGNITIVE_LOAD.md`
+- [ ] Deploy ke Vercel + isi `DEEPSEEK_API_KEY` (oleh pemilik proyek)
+- [ ] Sesuaikan dengan hasil uji coba instrumen ML ke S01 (Tahap 1)
+
 ## Fase 5 — Platform (minggu 8)
 - [ ] PWA (manifest, ikon, offline)
 - [ ] Capacitor Android → APK debug

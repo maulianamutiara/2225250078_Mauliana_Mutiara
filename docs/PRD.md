@@ -75,7 +75,7 @@ meminta **animasi**, **tarik garis dengan jari**, **umpan balik langsung**, **hi
 | F18 | **Bukti logis** setelah jawaban benar | P0 | Kolom "Mengapa jawabanmu benar?" tersimpan di data percobaan |
 | F19 | **Jurnal RMT** pada refleksi: pilih fungsi kognitif yang dipakai | P1 | Tersimpan bersama refleksi |
 | F21 | **Soal literasi matematika bertahap** (Topik 7): bacaan konteks, tahap berskor sesuai kisi-kisi, ringkasan skor per soal | P0 | 4 soal × maks 6; isian angka, pilih-semua, jelaskan alasan; skor tersimpan per tahap |
-| F20 | **Mediator AI (DeepSeek)**: tanya jawab di soal, tanggapan bukti logis & jurnal | P1 | Tidak memberi jawaban; kunci jawaban tidak dikirim; kunci API diisi di ⚙️ Pengaturan & hanya tersimpan di perangkat; aplikasi tetap jalan tanpa AI |
+| F20 | **Mediator AI (DeepSeek)**: tanya jawab di soal, tanggapan bukti logis & jurnal | P1 | Tidak memberi jawaban; kunci jawaban tidak dikirim; kunci API hanya di `.env` backend (bukan frontend/GitHub); siswa memilih jenis kesulitan; petunjuk bertahap 1–4 sesuai fase RMT; aplikasi tetap jalan tanpa AI |
 
 ## 7. Kebutuhan Non-Fungsional
 | Aspek | Kebutuhan |

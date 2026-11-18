@@ -115,6 +115,7 @@ function TopicRunner({ content, title }: { content: TopicContent; title: string 
       misconceptions: o.misconceptions,
       durationMs: o.durationMs,
       evidence: o.evidence,
+      aiHelp: o.aiHelp,
       at: new Date().toISOString(),
     });
 
@@ -127,6 +128,7 @@ function TopicRunner({ content, title }: { content: TopicContent; title: string 
       misconceptions: o.misconceptions,
       durationMs: o.durationMs,
       evidence: o.evidence,
+      aiHelp: o.aiHelp,
       at: new Date().toISOString(),
     });
     const next = [...results, starsForProblem(o.correct, o.tries, o.hintsUsed)];
