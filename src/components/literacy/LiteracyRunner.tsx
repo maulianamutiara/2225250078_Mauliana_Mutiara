@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { isRelationProblem, type LiteracyTask } from '../../content/types';
+import { trialFindings } from '../../content/trialFindings';
 import { stageScore } from '../../domain/literacy';
 import { ProblemView, type ProblemOutcome } from '../practice/ProblemView';
 import { Button } from '../ui/Button';
@@ -31,6 +32,7 @@ export function LiteracyRunner({ tasks, onRecord, onComplete }: LiteracyRunnerPr
   const task = tasks[ti];
   const stage = task.stages[si];
   const maxScore = task.stages.reduce((s, st) => s + st.score, 0);
+  const finding = stage.finding ? trialFindings[stage.finding] : undefined;
   // Konteks untuk Asisten Belajar: bacaan + indikator literasi + posisi tahap (bimbingan bertahap).
   const context = [
     `Soal Literasi Matematika: ${task.title}`,
@@ -38,6 +40,7 @@ export function LiteracyRunner({ tasks, onRecord, onComplete }: LiteracyRunnerPr
     ...task.story,
     `Pertanyaan: ${task.question}`,
     `Siswa sedang di Tahap ${stage.tahap} (${si + 1} dari ${task.stages.length}), skor maks tahap ini ${stage.score}. Bimbing hanya tahap ini.`,
+    ...(finding ? [`Kebiasaan yang dilatih di tahap ini (temuan uji coba): ${finding.aiGuidance}`] : []),
   ].join('\n');
 
   const finishStage = (score: number) => {
@@ -147,6 +150,11 @@ export function LiteracyRunner({ tasks, onRecord, onComplete }: LiteracyRunnerPr
             Skor maks {stage.score}
           </span>
         </div>
+        {finding && (
+          <p className="mt-2 rounded-xl border-2 border-amber-300 bg-amber-50 px-3 py-2 text-sm">
+            <span className="font-bold">💡 Kebiasaan baik:</span> {finding.habit}
+          </p>
+        )}
         <div className="mt-2 flex gap-1" aria-hidden>
           {task.stages.map((s, i) => (
             <span key={s.item.id} className={`h-2 flex-1 rounded-full ${i < si ? 'bg-brand' : i === si ? 'bg-brand/50' : 'bg-line'}`} />

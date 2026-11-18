@@ -3,6 +3,8 @@
 // Dasar: Cognitive Load Theory (intrinsik, ekstrinsik, germane), Rigorous Mathematical Thinking
 // (3 fase), dan Mediated Learning Experience (Feuerstein). Lihat docs/RMT.md & docs/COGNITIVE_LOAD.md.
 
+import { trialFindingList } from '../content/trialFindings.js';
+
 export type AiTask = 'mediator' | 'evidence' | 'explain' | 'reflection' | 'ping';
 export type LoadType = 'intrinsik' | 'ekstrinsik' | 'germane';
 export type Difficulty = 'read' | 'start' | 'wrong' | 'check' | 'other';
@@ -110,10 +112,17 @@ const MLE_RULES = [
   '- Rasa mampu: sebut dulu bagian yang sudah benar.',
 ];
 
+// Hasil uji coba instrumen ke siswa S01 (docs/UJI_COBA_S01.md) → kebiasaan yang perlu didorong.
+const TRIAL_RULES = [
+  'Temuan uji coba (kesulitan nyata siswa) — dorong kebiasaan ini bila relevan:',
+  ...trialFindingList.map((f) => `- ${f.aiGuidance}`),
+];
+
 export const MEDIATOR_SYSTEM = [
   ...COMMON_RULES,
   ...CL_RULES,
   ...MLE_RULES,
+  ...TRIAL_RULES,
   'Aturan wajib:',
   '1. JANGAN pernah memberi jawaban akhir, kunci, angka hasil, atau daftar pasangan yang benar.',
   '2. Akhiri dengan tepat satu pertanyaan penuntun yang bisa dijawab siswa.',

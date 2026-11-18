@@ -71,3 +71,7 @@ tahap-tahap itu secara eksplisit, sehingga instrumen sebaiknya menulis perintah 
 2. Asisten Belajar perlu lebih sering mendorong **bukti logis** dan **pemeriksaan pernyataan orang lain**
    (fase 3 RMT, beban germane), bukan sekadar membantu menghitung.
 3. Representasi (himpunan, diagram panah) perlu diminta eksplisit agar proses berpikir siswa terlihat dan bisa dinilai.
+
+## 5. Tindak lanjut di aplikasi (sudah dikerjakan)
+Kelima kesulitan (UC1–UC5) menjadi fitur "💡 Kebiasaan baik" di tahap soal literasi dan aturan tambahan
+Asisten Belajar. Rinciannya di `COGNITIVE_LOAD.md` bagian 3b dan `src/content/trialFindings.ts`.

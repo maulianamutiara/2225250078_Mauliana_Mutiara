@@ -167,6 +167,7 @@ const L1: LiteracyTask = {
     {
       tahap: '5',
       score: 1,
+      finding: 'UC4',
       item: {
         id: 'L1-T5',
         type: 'explain',
@@ -206,6 +207,7 @@ const L2: LiteracyTask = {
     {
       tahap: '1',
       score: 1,
+      finding: 'UC1',
       item: {
         id: 'L2-T1',
         type: 'multi',
@@ -232,6 +234,7 @@ const L2: LiteracyTask = {
     {
       tahap: '2',
       score: 1,
+      finding: 'UC2',
       item: {
         id: 'L2-T2',
         type: 'mcq',
@@ -251,6 +254,7 @@ const L2: LiteracyTask = {
     {
       tahap: '3',
       score: 1,
+      finding: 'UC2',
       item: {
         id: 'L2-T3',
         type: 'mcq',
@@ -373,6 +377,7 @@ const L3: LiteracyTask = {
       tahap: '2',
       score: 2,
       scoring: 'perMember',
+      finding: 'UC4',
       item: {
         id: 'L3-T2',
         type: 'arrow',
@@ -400,6 +405,7 @@ const L3: LiteracyTask = {
     {
       tahap: '3b',
       score: 1,
+      finding: 'UC3',
       item: {
         id: 'L3-T3b',
         type: 'cartesian',
@@ -455,6 +461,7 @@ const L4: LiteracyTask = {
     {
       tahap: '1',
       score: 1,
+      finding: 'UC4',
       item: {
         id: 'L4-T1',
         type: 'mcq',
@@ -497,6 +504,7 @@ const L4: LiteracyTask = {
     {
       tahap: '5',
       score: 1,
+      finding: 'UC5',
       item: {
         id: 'L4-T5',
         type: 'multi',

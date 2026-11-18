@@ -6,6 +6,7 @@ import { isRelationProblem, type NumbersProblem, type RelationProblem } from './
 import { CAKE, DAYS, DRINKS, literacyTasks, RIDES } from './topic7';
 import type { Relation } from '../domain/types';
 import { cognitiveFunctions, functionsFor, tools } from './rmt';
+import { trialFindingList, trialFindings } from './trialFindings';
 
 const sentences = (text: string) =>
   text
@@ -210,4 +211,30 @@ describe('kebenaran matematika soal bilangan', () => {
       expect(sort(p.relation.pairs)).toEqual(sort(expected));
     });
   }
+});
+
+describe('temuan uji coba S01 → fitur', () => {
+  it('kalimat "Kebiasaan baik" satu kalimat ≤ 20 kata', () => {
+    for (const f of trialFindingList) {
+      expect(sentences(f.habit), f.id).toHaveLength(1);
+      expect(words(f.habit), f.id).toBeLessThanOrEqual(20);
+    }
+  });
+
+  it('setiap temuan dipakai minimal di satu tahap soal literasi, dan rujukannya sah', () => {
+    const used = literacyTasks.flatMap((t) => t.stages.map((s) => s.finding).filter(Boolean));
+    for (const id of used) expect(trialFindings[id!], id).toBeDefined();
+    for (const f of trialFindingList) expect(used, f.id).toContain(f.id);
+  });
+
+  it('kebiasaan baik tidak membocorkan pasangan kunci di tahapnya', () => {
+    for (const t of literacyTasks) {
+      for (const s of t.stages) {
+        if (!s.finding || s.item.type === 'explain' || !isRelationProblem(s.item)) continue;
+        for (const [a, b] of s.item.relation.pairs) {
+          expect(trialFindings[s.finding].habit).not.toContain(`(${a}, ${b})`);
+        }
+      }
+    }
+  });
 });

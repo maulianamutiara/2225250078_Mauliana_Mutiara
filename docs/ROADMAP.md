@@ -59,9 +59,12 @@ Perkiraan total: **±10 minggu** kerja paruh waktu. Sesuaikan dengan jadwal skri
 - [x] Pilihan jenis kesulitan → jenis beban (ekstrinsik/intrinsik/germane) → bimbingan
 - [x] Tangga petunjuk 1–4 mengikuti fase RMT, naik bertahap sesuai usaha siswa
 - [x] Catatan bantuan AI per soal (`aiHelp`) untuk data penelitian; `docs/COGNITIVE_LOAD.md`
-- [ ] Deploy ke Vercel + isi `DEEPSEEK_API_KEY` (oleh pemilik proyek)
+- [x] Deploy ke Vercel + isi variabel lingkungan
 - [x] Analisis lembar jawaban uji coba S01 (`docs/UJI_COBA_S01.md`)
-- [ ] Sesuaikan instrumen/rubrik dan aplikasi dengan temuan S01 (menunggu keputusan dosen)
+- [x] Skoring S01 dengan Pedoman Penskoran resmi (20/24, nilai 83,3)
+- [x] Temuan S01 (UC1–UC5) → "Kebiasaan baik" per tahap + aturan Asisten Belajar
+- [x] Mediator AI aktif di Vercel (OpenRouter gratis; bisa diganti DeepSeek resmi lewat env)
+- [ ] Konfirmasi dosen: model gratis vs DeepSeek resmi
 
 ## Fase 5 — Platform (minggu 8)
 - [ ] PWA (manifest, ikon, offline)

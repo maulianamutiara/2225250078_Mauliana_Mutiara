@@ -1,4 +1,5 @@
 import { allProblems } from '../content';
+import { trialFindingList } from '../content/trialFindings';
 import { isRelationProblem, type Problem, type RelationProblem } from '../content/types';
 import { functionsFor, cognitiveFunctions } from '../content/rmt';
 import type { Pair } from '../domain/types';
@@ -59,6 +60,10 @@ describe('klien Mediator (memanggil backend, bukan DeepSeek)', () => {
 describe('pedagogi Mediator (Cognitive Load + RMT)', () => {
   it('aturan sistem melarang memberi jawaban akhir', () => {
     expect(MEDIATOR_SYSTEM).toContain('JANGAN pernah memberi jawaban');
+  });
+
+  it('aturan sistem memuat kebiasaan dari temuan uji coba S01', () => {
+    for (const f of trialFindingList) expect(MEDIATOR_SYSTEM, f.id).toContain(f.aiGuidance);
   });
 
   it('validateRequest menolak isi yang tidak sah', () => {

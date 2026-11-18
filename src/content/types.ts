@@ -1,4 +1,5 @@
 import type { AnswerMode } from '../domain/grading';
+import type { TrialFindingId } from './trialFindings';
 import type { Pair, Relation } from '../domain/types';
 import type { CognitiveFunctionId, ToolId } from './rmt';
 
@@ -90,6 +91,8 @@ export interface LiteracyStage {
   /** "perMember": skor sebagian menurut banyak anggota A yang pasangannya tepat. */
   scoring?: 'all' | 'perMember';
   item: Problem | ExplainStage;
+  /** Temuan uji coba yang dilatih di tahap ini → tampil sebagai "Kebiasaan baik". */
+  finding?: TrialFindingId;
 }
 
 /** Soal literasi matematika: konteks + beberapa tahap berskor. */

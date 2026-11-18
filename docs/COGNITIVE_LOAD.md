@@ -38,6 +38,23 @@ Prinsip utama: *AI berperan sebagai pembimbing proses berpikir matematis siswa, 
 - Bahkan di tingkat 3, AI **tidak** menyebut jawaban akhir, angka hasil, atau daftar pasangan.
 - Maks 6 pertanyaan per soal, agar siswa tetap berpikir sendiri dan beban tidak bertambah.
 
+## 3b. Penyesuaian dari hasil uji coba S01
+
+Uji coba instrumen Literasi Matematika ke S01 (skor 20/24, lihat `UJI_COBA_S01.md`) menunjukkan
+semua hasil akhir benar, tetapi **langkah dan representasi tidak dituliskan**. Setiap temuan menjadi dua fitur
+(data di `src/content/trialFindings.ts`):
+
+| Kode | Kesulitan S01 | Beban | "💡 Kebiasaan baik" muncul di | Aturan tambahan Asisten Belajar |
+|---|---|---|---|---|
+| UC1 | Memilah informasi penting | Ekstrinsik | L2 Tahap 1 | Minta siswa menyebut informasi yang dipakai dan tidak dipakai |
+| UC2 | Menulis himpunan A dan B | Intrinsik | L2 Tahap 2–3 | Minta himpunan asal dan kawan sebelum membahas pasangan |
+| UC3 | Menggambar diagram Cartesius | Intrinsik | L3 Tahap 3b | Dorong mengubah pasangan ke bentuk lain |
+| UC4 | Menuliskan proses/syarat | Germane | L1 Tahap 5, L3 Tahap 2, L4 Tahap 1 | Minta perhitungan atau syarat, bukan hanya hasil |
+| UC5 | Mengevaluasi jawaban orang lain | Germane | L4 Tahap 5 | Ajak memeriksa ulang tiap pasangan terhadap aturan dan arah |
+
+- Kalimat kebiasaan baik hanya satu kalimat (≤ 20 kata) dan tidak membocorkan jawaban (dijaga tes).
+- Aturan tambahan disusun di server, bersama aturan beban kognitif dan RMT.
+
 ## 4. Pengaman kebenaran dan keamanan
 
 - **Kunci jawaban tidak pernah dikirim ke AI.** AI hanya menerima soal, jawaban siswa, dan status
