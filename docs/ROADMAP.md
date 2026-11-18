@@ -60,7 +60,8 @@ Perkiraan total: **±10 minggu** kerja paruh waktu. Sesuaikan dengan jadwal skri
 - [x] Tangga petunjuk 1–4 mengikuti fase RMT, naik bertahap sesuai usaha siswa
 - [x] Catatan bantuan AI per soal (`aiHelp`) untuk data penelitian; `docs/COGNITIVE_LOAD.md`
 - [ ] Deploy ke Vercel + isi `DEEPSEEK_API_KEY` (oleh pemilik proyek)
-- [ ] Sesuaikan dengan hasil uji coba instrumen ML ke S01 (Tahap 1)
+- [x] Analisis lembar jawaban uji coba S01 (`docs/UJI_COBA_S01.md`)
+- [ ] Sesuaikan instrumen/rubrik dan aplikasi dengan temuan S01 (menunggu keputusan dosen)
 
 ## Fase 5 — Platform (minggu 8)
 - [ ] PWA (manifest, ikon, offline)
