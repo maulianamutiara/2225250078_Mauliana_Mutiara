@@ -1,6 +1,7 @@
 import { defineConfig } from 'vitest/config';
 import { loadEnv, type Plugin } from 'vite';
 import react from '@vitejs/plugin-react';
+import { VitePWA } from 'vite-plugin-pwa';
 import { handleChat, type ProxyEnv } from './server/chatHandler';
 
 /**
@@ -37,8 +38,42 @@ function devApi(env: ProxyEnv): Plugin {
   };
 }
 
+/**
+ * PWA: aplikasi bisa dipasang di HP (ikon di layar utama, layar penuh) dan materi + soal
+ * tetap jalan tanpa internet. Mediator AI (/api/chat) tetap butuh internet dan tidak disimpan.
+ */
+const pwa = VitePWA({
+  registerType: 'autoUpdate',
+  includeAssets: ['favicon.png', 'apple-touch-icon.png'],
+  manifest: {
+    id: './',
+    name: 'RelaSI Pintar — Belajar Relasi',
+    short_name: 'RelaSI Pintar',
+    description: 'Belajar materi Relasi kelas VIII lewat gambar, latihan, dan Asisten Belajar.',
+    lang: 'id',
+    start_url: './',
+    scope: './',
+    display: 'standalone',
+    orientation: 'portrait',
+    background_color: '#FEF6E4',
+    theme_color: '#0F766E',
+    icons: [
+      { src: 'icon-192.png', sizes: '192x192', type: 'image/png' },
+      { src: 'icon-512.png', sizes: '512x512', type: 'image/png' },
+      { src: 'icon-maskable-512.png', sizes: '512x512', type: 'image/png', purpose: 'maskable' },
+    ],
+  },
+  workbox: {
+    globPatterns: ['**/*.{js,css,html,png,svg,woff,woff2}'],
+    navigateFallback: 'index.html',
+    // Permintaan ke Mediator AI selalu lewat internet, tidak pernah dari cache.
+    navigateFallbackDenylist: [/^\/api\//],
+    cleanupOutdatedCaches: true,
+  },
+});
+
 export default defineConfig(({ mode }) => ({
-  plugins: [react(), devApi(loadEnv(mode, process.cwd(), '') as ProxyEnv)],
+  plugins: [react(), devApi(loadEnv(mode, process.cwd(), '') as ProxyEnv), pwa],
   // './' agar aset tetap jalan saat dibungkus Capacitor (Android) atau di-hosting di subfolder
   base: './',
   test: {

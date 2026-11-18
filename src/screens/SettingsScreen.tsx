@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { AiError, askAi } from '../ai/client';
 import { Button } from '../components/ui/Button';
 import { Card } from '../components/ui/Card';
+import { useInstallPrompt } from '../lib/installPrompt';
 import { useAiSettings } from '../store/aiSettings';
 
 /**
@@ -41,6 +42,8 @@ export function SettingsScreen() {
         ← Peta Belajar
       </Link>
       <h1 className="text-2xl font-bold">⚙️ Pengaturan</h1>
+
+      <InstallCard />
 
       <Card className="space-y-2">
         <p className="font-bold">🤖 Mediator AI (DeepSeek)</p>
@@ -88,5 +91,32 @@ export function SettingsScreen() {
         <p className="text-sm text-muted">Tanpa Mediator, semua materi dan soal tetap bisa dipakai.</p>
       </Card>
     </main>
+  );
+}
+
+/** Kartu "Pasang di HP" (PWA): ikon di layar utama, layar penuh, materi & soal jalan tanpa internet. */
+function InstallCard() {
+  const { canInstall, installed, ios, install } = useInstallPrompt();
+  return (
+    <Card className="space-y-2">
+      <p className="font-bold">📲 Pasang di HP</p>
+      {installed ? (
+        <p className="font-bold text-ok">✓ Aplikasi sudah terpasang di perangkat ini.</p>
+      ) : canInstall ? (
+        <>
+          <p>Pasang agar muncul ikon di layar HP dan bisa dibuka tanpa internet.</p>
+          <Button onClick={() => void install()}>📲 Pasang aplikasi</Button>
+        </>
+      ) : ios ? (
+        <ol className="list-decimal space-y-1 pl-5">
+          <li>Buka aplikasi ini di Safari.</li>
+          <li>Ketuk tombol Bagikan (kotak dengan panah ke atas).</li>
+          <li>Pilih "Tambahkan ke Layar Utama".</li>
+        </ol>
+      ) : (
+        <p>Di Chrome, ketuk menu ⋮ lalu pilih "Instal aplikasi" atau "Tambahkan ke layar utama".</p>
+      )}
+      <p className="text-sm text-muted">Materi dan soal tetap jalan tanpa internet. Mediator AI butuh internet.</p>
+    </Card>
   );
 }

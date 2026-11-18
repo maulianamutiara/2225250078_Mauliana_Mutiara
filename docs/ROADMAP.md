@@ -69,9 +69,9 @@ Perkiraan total: **±10 minggu** kerja paruh waktu. Sesuaikan dengan jadwal skri
 - [ ] Konfirmasi dosen: model gratis vs DeepSeek resmi
 
 ## Fase 5 — Platform (minggu 8)
-- [ ] PWA (manifest, ikon, offline)
+- [x] PWA (manifest, ikon, offline) + kartu "📲 Pasang di HP" di Pengaturan
 - [ ] Capacitor Android → APK debug
-- [ ] Deploy web (Netlify/Vercel)
+- [x] Deploy web (Vercel, dengan Mediator AI; GitHub Pages tanpa AI)
 - [ ] Ekspor data penelitian (F15)
 
 ## Fase 6 — Validasi & Revisi (minggu 9–10)
